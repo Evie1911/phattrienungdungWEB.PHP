@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Thanh Toán</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { DEFAULT: '#4f46e5', hover: '#4338ca' },
+                        cod: { DEFAULT: '#0284c7', bg: '#e0f2fe', text: '#0369a1' },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom animations and scrollbars */
+        .modal-animate {
+            animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 min-h-screen p-4 sm:p-6 lg:p-8 font-sans">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+
+        <!-- Header Section -->
+        <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-3">
+                    <span
+                        class="p-2.5 bg-indigo-50 text-indigo-600 rounded-lg text-xl flex items-center justify-center">
+                        <i class="fa-solid fa-credit-card"></i>
+                    </span>
+                    Quản Lý Thanh Toán
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">Theo dõi, xác nhận và xử lý giao dịch thanh toán của hệ thống</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="exportReport()"
+                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-file-export"></i> Xuất Báo Cáo
+                </button>
+                <button onclick="openNewTransactionModal()"
+                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Tạo Giao Dịch
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Overview Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="statsGrid">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Tổng Doanh Thu</div>
+                <div class="text-2xl font-extrabold text-slate-800" id="statTotalRevenue">0 ₫</div>
+                <div class="text-xs text-emerald-600 font-medium mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-up"></i> +12.5% so với tháng trước
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Thành Công</div>
+                <div class="text-2xl font-extrabold text-emerald-600" id="statSuccessCount">0</div>
+                <div class="text-xs text-slate-500 font-medium mt-2">Đã quyết toán xong</div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Chờ Xác Nhận / Duyệt
+                </div>
+                <div class="text-2xl font-extrabold text-amber-500" id="statPendingCount">0</div>
+                <div class="text-xs text-amber-600 font-medium mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-clock"></i> Cần kiểm tra ngân hàng
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Thanh Toán Khi Nhận Hàng
+                    (COD)</div>
+                <div class="text-2xl font-extrabold text-sky-600" id="statCodCount">0</div>
+                <div class="text-xs text-sky-600 font-medium mt-2 flex items-center gap-1">
+                    <i class="fa-solid fa-truck"></i> Chờ Shipper thu tiền
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Bar -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <!-- Search Box -->
+                <div class="lg:col-span-2 relative">
+                    <i
+                        class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchInput" oninput="applyFilters()"
+                        placeholder="Tìm theo Mã GD, Tên KH, SĐT..."
+                        class="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                </div>
+
+                <!-- Status Filter -->
+                <div>
+                    <select id="statusFilter" onchange="applyFilters()"
+                        class="w-full py-2 px-3 border border-slate-200 rounded-lg text-sm bg-white text-slate-700 focus:outline-none focus:border-indigo-500">
+                        <option value="ALL">Tất cả trạng thái</option>
+                        <option value="SUCCESS">Thành công</option>
+                        <option value="PENDING">Chờ xác nhận</option>
+                        <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                        <option value="REFUNDED">Đã hoàn tiền</option>
+                    </select>
+                </div>
+
+                <!-- Method Filter -->
+                <div>
+                    <select id="methodFilter" onchange="applyFilters()"
+                        class="w-full py-2 px-3 border border-slate-200 rounded-lg text-sm bg-white text-slate-700 focus:outline-none focus:border-indigo-500">
+                        <option value="ALL">Tất cả phương thức</option>
+                        <option value="COD">Tiền mặt (COD)</option>
+                        <option value="BANK">Chuyển khoản</option>
+                        <option value="VNPAY">VNPay QR</option>
+                        <option value="MOMO">Ví MoMo</option>
+                    </select>
+                </div>
+
+                <!-- Reset Button -->
+                <div class="flex gap-2">
+                    <button onclick="resetFilters()"
+                        class="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Đặt Lại
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Data Table -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-600">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-xs">
+                        <tr>
+                            <th class="py-3.5 px-4">Mã Giao Dịch</th>
+                            <th class="py-3.5 px-4">Khách Hàng</th>
+                            <th class="py-3.5 px-4">Phương Thức</th>
+                            <th class="py-3.5 px-4">Số Tiền</th>
+                            <th class="py-3.5 px-4">Ngày Tạo</th>
+                            <th class="py-3.5 px-4">Trạng Thái</th>
+                            <th class="py-3.5 px-4 text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentTableBody" class="divide-y divide-slate-200">
+                        <!-- Table rows populated dynamically by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State Container -->
+            <div id="emptyState" class="hidden py-12 text-center">
+                <div
+                    class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <h3 class="text-base font-semibold text-slate-700">Không tìm thấy giao dịch nào</h3>
+                <p class="text-sm text-slate-500 mt-1">Hãy thử thay đổi điều kiện tìm kiếm hoặc lọc của bạn.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal 1: Payment Detail View -->
+    <div id="detailModal"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl modal-animate border border-slate-100">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-indigo-600"></i> Chi Tiết Thanh Toán
+                </h3>
+                <button onclick="closeModal('detailModal')"
+                    class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <div id="detailModalContent" class="py-4 space-y-3">
+                <!-- Content inserted by JS -->
+            </div>
+            <div class="pt-4 border-t border-slate-100 flex justify-end">
+                <button onclick="closeModal('detailModal')"
+                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold text-sm">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Confirm Payment / COD Collection -->
+    <div id="confirmModal"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl modal-animate border border-slate-100">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i> Xác Nhận Thanh Toán
+                </h3>
+                <button onclick="closeModal('confirmModal')"
+                    class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <div class="py-4 space-y-3">
+                <p class="text-sm text-slate-600" id="confirmText">Xác nhận chuyển trạng thái giao dịch sang đã thanh
+                    thành công?</p>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Ghi chú xác nhận / Mã đối
+                        soát:</label>
+                    <textarea id="confirmNote" rows="3"
+                        class="w-full p-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500"
+                        placeholder="Nhập ghi chú thu tiền COD hoặc mã ngân hàng..."></textarea>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                <button onclick="closeModal('confirmModal')"
+                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold text-sm">Hủy</button>
+                <button id="btnExecuteConfirm" onclick="submitConfirm()"
+                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-sm shadow-sm">Xác
+                    Nhận Duyệt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Request Refund -->
+    <div id="refundModal"
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl modal-animate border border-slate-100">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left text-rose-600"></i> Yêu Cầu Hoàn Tiền
+                </h3>
+                <button onclick="closeModal('refundModal')"
+                    class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <div class="py-4 space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Số tiền hoàn:</label>
+                    <input type="text" id="refundAmount" readonly
+                        class="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm font-bold text-slate-700">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Lý do hoàn tiền (<span
+                            class="text-rose-500">*</span>):</label>
+                    <textarea id="refundReason" rows="3"
+                        class="w-full p-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500"
+                        placeholder="Khách trả hàng, thanh toán nhầm, hủy đơn..."></textarea>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                <button onclick="closeModal('refundModal')"
+                    class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold text-sm">Hủy</button>
+                <button onclick="submitRefund()"
+                    class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold text-sm shadow-sm">Xác
+                    Nhận Hoàn Tiền</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial Dataset
+        let paymentsData = [
+            { id: 'PAY-9825', customer: 'Phạm Minh Tuấn', phone: '0988 123 456', amount: 850000, method: 'COD', methodLabel: 'Thanh toán COD', status: 'COD', date: '19/09/2026 11:20', bankRef: 'COD-SHIPPER-442', note: 'Chờ giao hàng và thu tiền tại nhà' },
+            { id: 'PAY-9824', customer: 'Trần Thị B', phone: '0912 888 999', amount: 2300000, method: 'BANK', methodLabel: 'Chuyển khoản', status: 'PENDING', date: '19/09/2026 09:40', bankRef: '-', note: 'Chờ xác nhận tiền về tài khoản MB' },
+            { id: 'PAY-9823', customer: 'Nguyễn Văn A', phone: '0901 234 567', amount: 1500000, method: 'VNPAY', methodLabel: 'VNPay QR', status: 'SUCCESS', date: '19/09/2026 10:15', bankRef: 'VNP14298123', note: 'Đã hoàn tất thanh toán tự động' },
+            { id: 'PAY-9822', customer: 'Hoàng Quốc Việt', phone: '0977 444 555', amount: 3200000, method: 'COD', methodLabel: 'Thanh toán COD', status: 'COD', date: '18/09/2026 18:05', bankRef: 'COD-SHIPPER-119', note: 'Đã gửi hàng cho đơn vị vận chuyển' },
+            { id: 'PAY-9821', customer: 'Lê Hoàng C', phone: '0933 111 222', amount: 450000, method: 'MOMO', methodLabel: 'Ví MoMo', status: 'REFUNDED', date: '18/09/2026 16:20', bankRef: 'MM90281234', note: 'Đã hoàn tiền do khách thay đổi ý định' }
+        ];
+
+        let activeTargetId = null;
+
+        // Render Table & Badges
+        function renderTable(data = paymentsData) {
+            const tbody = document.getElementById('paymentTableBody');
+            const emptyState = document.getElementById('emptyState');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors border-b border-slate-100';
+
+                // Status Badge styling including new COD state
+                let badgeHTML = '';
+                if (item.status === 'SUCCESS') {
+                    badgeHTML = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800"><i class="fa-solid fa-circle-check mr-1.5 text-emerald-500"></i> Thành công</span>`;
+                } else if (item.status === 'PENDING') {
+                    badgeHTML = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800"><i class="fa-solid fa-clock mr-1.5 text-amber-500"></i> Chờ xác nhận</span>`;
+                } else if (item.status === 'COD') {
+                    badgeHTML = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-100 text-sky-800"><i class="fa-solid fa-truck-fast mr-1.5 text-sky-600"></i> COD (Khi nhận hàng)</span>`;
+                } else if (item.status === 'REFUNDED') {
+                    badgeHTML = `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-800"><i class="fa-solid fa-rotate-left mr-1.5 text-rose-500"></i> Đã hoàn tiền</span>`;
+                }
+
+                // Payment Icon
+                let iconHTML = '<i class="fa-solid fa-wallet text-slate-400"></i>';
+                if (item.method === 'COD') iconHTML = '<i class="fa-solid fa-hand-holding-dollar text-sky-600"></i>';
+                if (item.method === 'BANK') iconHTML = '<i class="fa-solid fa-building-columns text-indigo-600"></i>';
+                if (item.method === 'VNPAY') iconHTML = '<i class="fa-solid fa-qrcode text-rose-600"></i>';
+                if (item.method === 'MOMO') iconHTML = '<i class="fa-solid fa-wallet text-pink-600"></i>';
+
+                // Contextual action buttons based on payment status
+                let actionsHTML = `
+                    <button onclick="viewDetails('${item.id}')" title="Xem chi tiết" class="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                `;
+
+                if (item.status === 'PENDING') {
+                    actionsHTML += `
+                        <button onclick="openConfirmModal('${item.id}')" title="Xác nhận thanh toán" class="ml-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-md shadow-sm transition-all flex items-center inline-flex gap-1">
+                            <i class="fa-solid fa-check"></i> Duyệt
+                        </button>
+                    `;
+                } else if (item.status === 'COD') {
+                    actionsHTML += `
+                        <button onclick="openConfirmModal('${item.id}')" title="Xác nhận đã thu tiền COD" class="ml-1 px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-md shadow-sm transition-all flex items-center inline-flex gap-1">
+                            <i class="fa-solid fa-box-check"></i> Đã thu tiền
+                        </button>
+                    `;
+                }
+
+                if (item.status === 'SUCCESS') {
+                    actionsHTML += `
+                        <button onclick="openRefundModal('${item.id}')" title="Hoàn tiền" class="ml-1 p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td class="py-3.5 px-4 font-bold text-slate-800">${item.id}</td>
+                    <td class="py-3.5 px-4">
+                        <div class="font-medium text-slate-800">${item.customer}</div>
+                        <div class="text-xs text-slate-400">${item.phone}</div>
+                    </td>
+                    <td class="py-3.5 px-4">
+                        <span class="flex items-center gap-2">
+                            ${iconHTML} ${item.methodLabel}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-4 font-bold text-slate-800">${formatCurrency(item.amount)}</td>
+                    <td class="py-3.5 px-4 text-xs text-slate-500">${item.date}</td>
+                    <td class="py-3.5 px-4">${badgeHTML}</td>
+                    <td class="py-3.5 px-4 text-center whitespace-nowrap">${actionsHTML}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateStats();
+        }
+
+        // Format Currency Utility
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        }
+
+        // Real-time Statistics Calculator
+        function updateStats() {
+            const totalRevenue = paymentsData
+                .filter(x => x.status === 'SUCCESS')
+                .reduce((sum, item) => sum + item.amount, 0);
+
+            const successCount = paymentsData.filter(x => x.status === 'SUCCESS').length;
+            const pendingCount = paymentsData.filter(x => x.status === 'PENDING').length;
+            const codCount = paymentsData.filter(x => x.status === 'COD').length;
+
+            document.getElementById('statTotalRevenue').innerText = formatCurrency(totalRevenue);
+            document.getElementById('statSuccessCount').innerText = successCount;
+            document.getElementById('statPendingCount').innerText = pendingCount;
+            document.getElementById('statCodCount').innerText = codCount;
+        }
+
+        // Search & Filter Operations
+        function applyFilters() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            const selectedStatus = document.getElementById('statusFilter').value;
+            const selectedMethod = document.getElementById('methodFilter').value;
+
+            const filtered = paymentsData.filter(item => {
+                const matchesKeyword = item.id.toLowerCase().includes(keyword) ||
+                    item.customer.toLowerCase().includes(keyword) ||
+                    item.phone.includes(keyword);
+
+                const matchesStatus = (selectedStatus === 'ALL') || (item.status === selectedStatus);
+                const matchesMethod = (selectedMethod === 'ALL') || (item.method === selectedMethod);
+
+                return matchesKeyword && matchesStatus && matchesMethod;
+            });
+
+            renderTable(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = 'ALL';
+            document.getElementById('methodFilter').value = 'ALL';
+            renderTable(paymentsData);
+        }
+
+        // Modal Helpers
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Dynamic Details View
+        function viewDetails(id) {
+            const item = paymentsData.find(x => x.id === id);
+            if (!item) return;
+
+            let statusLabel = item.status;
+            if (item.status === 'SUCCESS') statusLabel = 'Thành công';
+            if (item.status === 'PENDING') statusLabel = 'Chờ xác nhận';
+            if (item.status === 'COD') statusLabel = 'Thanh toán khi nhận hàng (COD)';
+            if (item.status === 'REFUNDED') statusLabel = 'Đã hoàn tiền';
+
+            const content = `
+                <div class="flex justify-between py-2 border-b border-slate-100 text-sm">
+                    <span class="text-slate-500">Mã giao dịch:</span>
+                    <span class="font-bold text-slate-800">${item.id}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-100 text-sm">
+                    <span class="text-slate-500">Tên khách hàng:</span>
+                    <span class="font-medium text-slate-800">${item.customer}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-100 text-sm">
+                    <span class="text-slate-500">Số điện thoại:</span>
+                    <span class="font-medium text-slate-800">${item.phone}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-100 text-sm">
+                    <span class="text-slate-500">Số tiền:</span>
+                    <span class="font-bold text-indigo-600 text-base">${formatCurrency(item.amount)}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-100 text-sm">
+                    <span class="text-slate-500">Phương thức thanh toán:</span>
+                    <span class="font-medium text-slate-800">${item.methodLabel}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-100 text-sm">
+                    <span class="text-slate-500">Mã đối soát / Ref:</span>
+                    <span class="font-mono text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">${item.bankRef}</span>
+                </div>
+                <div class="flex justify-between py-2 border-b border-slate-100 text-sm">
+                    <span class="text-slate-500">Trạng thái:</span>
+                    <span class="font-semibold text-slate-800">${statusLabel}</span>
+                </div>
+                <div class="flex justify-between py-2 text-sm">
+                    <span class="text-slate-500">Ghi chú:</span>
+                    <span class="text-slate-700 italic text-right max-w-[220px]">${item.note || 'Không có'}</span>
+                </div>
+            `;
+
+            document.getElementById('detailModalContent').innerHTML = content;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        // Open Confirmation Dynamic Dialog
+        function openConfirmModal(id) {
+            activeTargetId = id;
+            const item = paymentsData.find(x => x.id === id);
+            if (!item) return;
+
+            const confirmText = document.getElementById('confirmText');
+            if (item.status === 'COD') {
+                confirmText.innerHTML = `Xác nhận đã thu tiền mặt <b>${formatCurrency(item.amount)}</b> từ khách hàng <b>${item.customer}</b> thông qua shipper?`;
+            } else {
+                confirmText.innerHTML = `Xác nhận đã nhận khoản tiền <b>${formatCurrency(item.amount)}</b> từ khách hàng <b>${item.customer}</b> qua tài khoản ngân hàng?`;
+            }
+
+            document.getElementById('confirmNote').value = '';
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function submitConfirm() {
+            if (!activeTargetId) return;
+            const item = paymentsData.find(x => x.id === activeTargetId);
+            if (item) {
+                item.status = 'SUCCESS';
+                item.note = document.getElementById('confirmNote').value || 'Đã xác nhận thanh toán thành công';
+                renderTable();
+            }
+            closeModal('confirmModal');
+        }
+
+        // Refund Handling
+        function openRefundModal(id) {
+            activeTargetId = id;
+            const item = paymentsData.find(x => x.id === id);
+            if (!item) return;
+
+            document.getElementById('refundAmount').value = formatCurrency(item.amount);
+            document.getElementById('refundReason').value = '';
+            document.getElementById('refundModal').classList.remove('hidden');
+        }
+
+        function submitRefund() {
+            const reason = document.getElementById('refundReason').value.trim();
+            if (!reason) {
+                alert('Vui lòng điền lý do hoàn tiền!');
+                return;
+            }
+
+            const item = paymentsData.find(x => x.id === activeTargetId);
+            if (item) {
+                item.status = 'REFUNDED';
+                item.note = 'Lý do hoàn tiền: ' + reason;
+                renderTable();
+            }
+            closeModal('refundModal');
+        }
+
+        // Export Report Trigger Placeholder
+        function exportReport() {
+            alert('Đã xuất báo cáo danh sách thanh toán dưới dạng file CSV/Excel!');
+        }
+
+        // Modal Add New Placeholder
+        function openNewTransactionModal() {
+            alert('Tính năng tạo hóa đơn / giao dịch mới đang được phát triển.');
+        }
+
+        // Initial Load
+        window.onload = function () {
+            renderTable();
+        };
+    </script>
+</body>
+
+</html>
