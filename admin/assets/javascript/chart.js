@@ -80,14 +80,4 @@ document.addEventListener("DOMContentLoaded", () => {
             scales: { y: { beginAtZero: true, max: 120 } },
         },
     });
-
-    // Hàm cập nhật khi thay đổi thẻ <select>
-    function updateRevenueChart(type) {
-        const d = revenueData[type];
-        barChart.data.labels = d.labels;
-        barChart.data.datasets[0].data = d.revenue;
-        barChart.data.datasets[1].data = d.profit;
-        barChart.options.scales.y.max = d.max;
-        barChart.update();
-    }
 })

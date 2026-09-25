@@ -1,177 +1,123 @@
 <?php
-require_once 'config.php';
-
-$pageTitle = "Bảng điều khiển";
-$navTitle = "Trang chủ";
-
-include 'includes/header.php';
-include 'includes/sidebar.php';
-include 'includes/navbar.php';
+require_once __DIR__ . '/config.php';
 ?>
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/data.css">
+<!DOCTYPE html>
+<html lang="vi">
 
-<main class="main-content" style="margin-top: 20px;">
-    <div class="form-scroll-container dashboard-container">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập & Quên mật khẩu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/dangnhap.css">
 
-        <!-- Tiêu đề trang quản trị -->
-        <div class="dashboard-header">
-            Trang chủ quản trị
+</head>
+
+<body>
+
+    <!-- Radio Controls ẩn để chuyển trạng thái giao diện-->
+    <input type="radio" name="auth_state" id="state-login" class="auth-state-radio" checked>
+    <input type="radio" name="auth_state" id="state-forgot" class="auth-state-radio">
+    <input type="radio" name="auth_state" id="state-otp" class="auth-state-radio">
+
+    <div class="bg-diagonal"></div>
+    <main class="login-container">
+        <div class="login-body">
+            <div class="illustration-col">
+                <img
+                    src="https://admin.thuevpsgiare.vn/wp-content/uploads/2025/02/Ung-dung-thuc-te-cua-Clone.png"
+                    alt="Hệ thống POS"
+                    class="pos-image">
+            </div>
+            <!-- Cột Form xử lý -->
+            <div class="form-col">
+                <!-- 1. GIAO DIỆN ĐĂNG NHẬP -->
+                <div id="loginSection" class="auth-form">
+                    <h1 class="form-title">ĐĂNG NHẬP HỆ THỐNG</h1>
+                    <form id="loginForm" action="<?php echo BASE_URL; ?>/page/thongke/thongke.php" method="POST">
+                        <div class="input-group">
+                            <i class="fa-regular fa-user input-icon"></i>
+                            <input
+                                type="text"
+                                name="username"
+                                id="username"
+                                placeholder="Tài khoản quản trị"
+                                required
+                                autocomplete="username">
+                        </div>
+                        <div class="input-group">
+                            <i class="fa-solid fa-key input-icon"></i>
+                            <input
+                                type="password"
+                                name="password"
+                                id="password"
+                                placeholder="Mật khẩu"
+                                required
+                                autocomplete="current-password">
+                        </div>
+                        <button type="submit" class="btn-submit">
+                            Đăng nhập
+                        </button>
+                        <div class="forgot-password-wrap">
+                            <label for="state-forgot" id="forgotPasswordLink" style="cursor: pointer;">Bạn quên mật khẩu?</label>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 2. GIAO DIỆN QUÊN MẬT KHẨU - NHẬP EMAIL -->
+                <div id="forgotSection" class="auth-form">
+                    <h1 class="form-title">QUÊN MẬT KHẨU</h1>
+                    <p style="font-size: 14px; color: #6b7280; margin-bottom: 20px;">Vui lòng nhập Email để nhận mã xác nhận khôi phục mật khẩu.</p>
+                    <form id="forgotForm">
+                        <div class="input-group">
+                            <i class="fa-regular fa-envelope input-icon"></i>
+                            <input
+                                type="email"
+                                name="email"
+                                placeholder="Nhập địa chỉ Email"
+                                required>
+                        </div>
+                        <label for="state-otp" class="btn-submit btn-label">
+                            Gửi mã xác nhận
+                        </label>
+                        <div style="text-align: center;">
+                            <label for="state-login" class="back-to-login">
+                                <i class="fa-solid fa-arrow-left"></i> Quay lại Đăng nhập
+                            </label>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 3. GIAO DIỆN NHẬP MÃ XÁC NHẬN (OTP) -->
+                <div id="otpSection" class="auth-form">
+                    <h1 class="form-title">XÁC NHẬN MÃ OTP</h1>
+                    <p style="font-size: 14px; color: #6b7280;">Nhập mã xác nhận gồm 4 chữ số đã được gửi tới Email của bạn.</p>
+                    <form id="verifyForm">
+                        <div class="code-inputs">
+                            <input type="text" maxlength="1" required>
+                            <input type="text" maxlength="1" required>
+                            <input type="text" maxlength="1" required>
+                            <input type="text" maxlength="1" required>
+                        </div>
+                        <label for="state-login" class="btn-submit btn-label">
+                            Xác nhận
+                        </label>
+                        <div style="text-align: center;">
+                            <label for="state-login" class="back-to-login">
+                                <i class="fa-solid fa-arrow-left"></i> Hủy & Quay lại
+                            </label>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
         </div>
+        <footer class="login-footer">
+            <p>Phần mềm quản lý bán hàng &copy; <?php echo date('Y'); ?></p>
+        </footer>
+    </main>
 
-        <div class="stats-grid">
-            <div class="stat-card blue">
-                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-                <div class="stat-title">Tổng khách hàng</div>
-                <div class="stat-value">56 khách hàng</div>
-                <div class="stat-desc">Tổng số khách hàng được quản lý.</div>
-            </div>
-            <div class="stat-card dark-blue">
-                <div class="stat-icon"><i class="fa-solid fa-database"></i></div>
-                <div class="stat-title">Tổng sản phẩm</div>
-                <div class="stat-value">1850 sản phẩm</div>
-                <div class="stat-desc">Tổng số sản phẩm được quản lý.</div>
-            </div>
-            <div class="stat-card yellow">
-                <div class="stat-icon"><i class="fa-solid fa-bag-shopping"></i></div>
-                <div class="stat-title">Tổng đơn hàng</div>
-                <div class="stat-value">247 đơn hàng</div>
-                <div class="stat-desc">Tổng số hóa đơn bán hàng trong tháng.</div>
-            </div>
-            <div class="stat-card red">
-                <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                <div class="stat-title">Sắp hết hàng</div>
-                <div class="stat-value">4 sản phẩm</div>
-                <div class="stat-desc">Số sản phẩm cảnh báo hết cần nhập thêm.</div>
-            </div>
-        </div>
+</body>
 
-        <div class="dashboard-main-grid">
-
-            <div class="dashboard-column">
-
-                <!-- Tình trạng đơn hàng -->
-                <div class="dashboard-box">
-                    <h3 class="dashboard-box-title">Tình trạng đơn hàng</h3>
-                    <div class="dashboard-table-wrapper">
-                        <table class="dashboard-table">
-                            <thead>
-                                <tr>
-                                    <th>ID đơn hàng</th>
-                                    <th>Tên khách hàng</th>
-                                    <th>Tổng tiền</th>
-                                    <th>Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="font-weight: 500;">AL3947</td>
-                                    <td>Phạm Thị Ngọc</td>
-                                    <td>19.770.000 đ</td>
-                                    <td><span class="badge badge-pending">Chờ xử lý</span></td>
-                                </tr>
-                                <tr>
-                                    <td style="font-weight: 500;">ER3835</td>
-                                    <td>Nguyễn Thị Mỹ Yến</td>
-                                    <td>16.770.000 đ</td>
-                                    <td><span class="badge badge-shipping">Đang vận chuyển</span></td>
-                                </tr>
-                                <tr>
-                                    <td style="font-weight: 500;">MD0837</td>
-                                    <td>Triệu Thanh Phú</td>
-                                    <td>9.400.000 đ</td>
-                                    <td><span class="badge badge-success">Đã hoàn thành</span></td>
-                                </tr>
-                                <tr>
-                                    <td style="font-weight: 500;">MT9B35</td>
-                                    <td>Đặng Hoàng Phúc</td>
-                                    <td>40.650.000 đ</td>
-                                    <td><span class="badge badge-cancel">Đã hủy</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Khách hàng mới -->
-                <div class="dashboard-box">
-                    <h3 class="dashboard-box-title">Khách hàng mới</h3>
-                    <div class="dashboard-table-wrapper">
-                        <table class="dashboard-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Tên khách hàng</th>
-                                    <th>Ngày sinh</th>
-                                    <th>Số điện thoại</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="font-weight: 500;">#183</td>
-                                    <td>Hột vịt muối</td>
-                                    <td>21/7/1992</td>
-                                    <td>0921387221</td>
-                                </tr>
-                                <tr>
-                                    <td style="font-weight: 500;">#219</td>
-                                    <td>Bánh tráng trộn</td>
-                                    <td>30/4/1975</td>
-                                    <td>0912376352</td>
-                                </tr>
-                                <tr>
-                                    <td style="font-weight: 500;">#627</td>
-                                    <td>Cút rang bơ</td>
-                                    <td>12/3/1999</td>
-                                    <td>01287326854</td>
-                                </tr>
-                                <tr>
-                                    <td style="font-weight: 500;">#175</td>
-                                    <td>Hủ tiếu nam vang</td>
-                                    <td>4/12/2000</td>
-                                    <td>0912376763</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- CỘT PHẢI: Biểu đồ -->
-            <div class="dashboard-column">
-
-                <!-- Biểu đồ đường  -->
-                <div class="dashboard-box">
-                    <h3 class="dashboard-box-title" style="margin-bottom: 15px;">Dữ liệu 6 tháng đầu vào</h3>
-                    <div class="chart-container">
-                        <canvas id="lineChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Biểu đồ cột (Bar Chart) -->
-                <div class="dashboard-box">
-                    <div class="dashboard-box-title" style="margin-bottom: 15px;">
-                        <span>Thống kê doanh thu</span>
-                        <select style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
-                            <option>Theo Tháng</option>
-                            <option>Theo Quý</option>
-                            <option>Theo Năm</option>
-                        </select>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="barChart"></canvas>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-</main>
-
-
-
-<?php
-include 'includes/footer.php';
-?>
+</html>

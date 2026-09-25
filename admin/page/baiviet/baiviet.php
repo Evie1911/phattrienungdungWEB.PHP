@@ -153,7 +153,6 @@ function limitWords($string, $limit = 5)
                             </div>
                         </td>
                     </tr>
-                    <!-- Thêm bài viết mới thứ 1: BV-106 -->
                     <tr>
                         <td><strong>BV-106</strong></td>
                         <td><img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=100&auto=format&fit=crop&q=80" alt="Thumbnail" class="product-img"></td>
@@ -171,7 +170,6 @@ function limitWords($string, $limit = 5)
                             </div>
                         </td>
                     </tr>
-                    <!-- Thêm bài viết mới thứ 2: BV-107 -->
                     <tr>
                         <td><strong>BV-107</strong></td>
                         <td><img src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=100&auto=format&fit=crop&q=80" alt="Thumbnail" class="product-img"></td>

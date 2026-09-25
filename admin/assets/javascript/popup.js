@@ -104,6 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   }
+  //nút xóa
   const deleteButtons = document.querySelectorAll(".nutxoa");
   deleteButtons.forEach((button) => {
     button.addEventListener("click", function (e) {

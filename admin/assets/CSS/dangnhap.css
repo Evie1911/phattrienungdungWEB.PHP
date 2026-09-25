@@ -1,0 +1,272 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #03162d;
+    position: relative;
+    overflow-x: hidden;
+    padding: 20px;
+}
+
+/* Nền */
+.bg-diagonal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(130deg, #ffffff 50%, #03162d 50%);
+    z-index: 0;
+}
+
+/* --- Khung Đăng nhập --- */
+.login-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 880px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    padding: 40px 50px 30px 50px;
+}
+
+.login-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+/* --- Cột bên trái  --- */
+.illustration-col {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pos-image {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    object-fit: contain;
+}
+
+/* --- Cột bên phải  --- */
+.form-col {
+    flex: 1;
+    max-width: 360px;
+}
+
+.form-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 24px;
+    letter-spacing: -0.3px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #475569;
+    font-size: 15px;
+    pointer-events: none;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 14px 12px 40px;
+    background-color: #f1f5f9;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.input-group input::placeholder {
+    color: #64748b;
+}
+
+.input-group input:focus {
+    background-color: #ffffff;
+    border-color: #facc15;
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.2);
+}
+
+/* Nút ẩn/hiện Mật khẩu */
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.toggle-password:hover {
+    color: #0f172a;
+}
+
+/* Nút Đăng Nhập Vàng */
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: #facc15;
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-submit:hover {
+    background-color: #eab308;
+}
+
+.btn-submit:active {
+    transform: scale(0.99);
+}
+
+/* Link Quên mật khẩu */
+.forgot-password-wrap {
+    text-align: right;
+    margin-top: 14px;
+}
+
+.forgot-password-wrap a {
+    color: #1e293b;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.forgot-password-wrap a:hover {
+    color: #1d4ed8;
+}
+
+/* --- Footer --- */
+.login-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+    text-align: center;
+}
+
+.login-footer p {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+/* CSS điều hướng chuyển đổi giao diện  */
+.auth-state-radio {
+    display: none;
+}
+
+.auth-form {
+    display: none;
+}
+
+#state-login:checked~.login-container .login-body .form-col #loginSection,
+#state-forgot:checked~.login-container .login-body .form-col #forgotSection,
+#state-otp:checked~.login-container .login-body .form-col #otpSection {
+    display: block;
+}
+
+.back-to-login {
+    display: inline-block;
+    margin-top: 15px;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.back-to-login:hover {
+    color: #2563eb;
+}
+
+.code-inputs {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.code-inputs input {
+    width: 45px;
+    height: 50px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+}
+
+.code-inputs input:focus {
+    border-color: #2563eb;
+    outline: none;
+}
+
+.btn-label {
+    display: block;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .bg-diagonal {
+        background: linear-gradient(180deg, #ffffff 60%, #03162d 40%);
+    }
+
+    .login-container {
+        padding: 30px 24px 20px 24px;
+    }
+
+    .login-body {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .form-col {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .form-title {
+        text-align: center;
+    }
+}
