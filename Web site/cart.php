@@ -4,6 +4,7 @@ require_once __DIR__ . '/data/data_helper.php';
 
 $action = $_REQUEST['action'] ?? '';
 
+
 if ($action === 'add') {
     $product_id = $_REQUEST['id'] ?? 0;
     $quantity = $_REQUEST['quantity'] ?? 1;
