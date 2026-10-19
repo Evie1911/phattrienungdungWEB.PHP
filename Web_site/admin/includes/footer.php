@@ -5,6 +5,4 @@
  <script src="<?php echo BASE_URL; ?>/assets/javascript/chart.js"></script>
  <script src="<?php echo BASE_URL; ?>/assets/javascript/popup.js"></script>
 
-
-
  </html>

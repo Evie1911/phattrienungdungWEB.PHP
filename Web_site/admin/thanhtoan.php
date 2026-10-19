@@ -1,12 +1,12 @@
 <?php
-require_once '../../config.php';
+require_once '../config.php';
 // Cấu hình tiêu đề động cho trang
 $pageTitle = "Quản lý thanh toán";
 
 //Các thành phần giao diện
-include '../../includes/header.php';
-include '../../includes/sidebar.php';
-include '../../includes/navbar.php';
+include("includes/header.php");
+include("includes/sidebar.php");
+include("includes/navbar.php");
 ?>
 
 
@@ -48,7 +48,7 @@ include '../../includes/navbar.php';
                 <h1>Quản Lý Thanh Toán</h1>
                 <p>Theo dõi, kiểm tra lịch sử giao dịch và trạng thái thanh toán đơn hàng</p>
             </div>
-            <a href="<?php echo BASE_URL; ?>/page/thanhtoan/themthanhtoan.php" class="btn-primary" title="Tạo giao dịch thủ công">
+            <a href="<?php echo BASE_URL; ?>/themthanhtoan.php" class="btn-primary" title="Tạo giao dịch thủ công">
                 <i class="fa-solid fa-plus"></i> <span>Tạo giao dịch mới</span>
             </a>
         </div>
@@ -202,5 +202,5 @@ include '../../includes/navbar.php';
     </div>
 </main>
 <?php
-include '../../includes/footer.php';
+include("includes/footer.php");
 ?>

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config.php';
+require_once '../config.php';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -35,7 +35,7 @@ require_once __DIR__ . '/config.php';
                 <!-- 1. GIAO DIỆN ĐĂNG NHẬP -->
                 <div id="loginSection" class="auth-form">
                     <h1 class="form-title">ĐĂNG NHẬP HỆ THỐNG</h1>
-                    <form id="loginForm" action="<?php echo BASE_URL; ?>/page/thongke/thongke.php" method="POST">
+                    <form id="loginForm" action="<?php echo BASE_URL; ?>/thongke.php" method="POST">
                         <div class="input-group">
                             <i class="fa-regular fa-user input-icon"></i>
                             <input

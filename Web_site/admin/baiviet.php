@@ -1,12 +1,12 @@
 <?php
-require_once '../../config.php';
+require_once '../config.php';
 // Cấu hình tiêu đề động cho trang
 $pageTitle = "Quản lý bài viết";
 
 // Các thành phần giao diện
-include '../../includes/header.php';
-include '../../includes/sidebar.php';
-include '../../includes/navbar.php';
+include("includes/header.php");
+include("includes/sidebar.php");
+include("includes/navbar.php");
 
 // Cắt chuỗi giới hạn đúng $limit từ (mặc định là 5 chữ)
 function limitWords($string, $limit = 5)
@@ -26,7 +26,7 @@ function limitWords($string, $limit = 5)
                 <h1>Quản Lý Bài Viết</h1>
                 <p>Thêm mới, chỉnh sửa và quản lý nội dung bài viết, tin tức</p>
             </div>
-            <a href="<?php echo BASE_URL; ?>/page/baiviet/thembaiviet.php" class="btn-primary" title="Thêm bài viết mới">
+            <a href="<?php echo BASE_URL; ?>/thembaiviet.php" class="btn-primary" title="Thêm bài viết mới">
                 <i class="fa-solid fa-plus"></i> <span>Thêm bài viết mới</span>
             </a>
         </div>
@@ -78,7 +78,7 @@ function limitWords($string, $limit = 5)
                         <td><span class="badge-status status-green">Đã xuất bản</span></td>
                         <td>
                             <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/page/baiviet/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
+                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
                                 <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
@@ -95,7 +95,7 @@ function limitWords($string, $limit = 5)
                         <td><span class="badge-status status-green">Đã xuất bản</span></td>
                         <td>
                             <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/page/baiviet/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
+                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
                                 <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
@@ -112,7 +112,7 @@ function limitWords($string, $limit = 5)
                         <td><span class="badge-status status-yellow">Bản nháp</span></td>
                         <td>
                             <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/page/baiviet/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
+                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
                                 <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
@@ -129,7 +129,7 @@ function limitWords($string, $limit = 5)
                         <td><span class="badge-status status-red">Chờ duyệt</span></td>
                         <td>
                             <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/page/baiviet/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
+                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
                                 <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
@@ -146,7 +146,7 @@ function limitWords($string, $limit = 5)
                         <td><span class="badge-status status-green">Đã xuất bản</span></td>
                         <td>
                             <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/page/baiviet/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
+                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
                                 <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
@@ -163,7 +163,7 @@ function limitWords($string, $limit = 5)
                         <td><span class="badge-status status-green">Đã xuất bản</span></td>
                         <td>
                             <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/page/baiviet/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
+                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
                                 <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
@@ -180,7 +180,7 @@ function limitWords($string, $limit = 5)
                         <td><span class="badge-status status-yellow">Bản nháp</span></td>
                         <td>
                             <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/page/baiviet/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
+                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
                                 <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
                                     <i class="fa-regular fa-trash-can"></i>
                                 </button>
@@ -193,5 +193,5 @@ function limitWords($string, $limit = 5)
     </div>
 </main>
 <?php
-include '../../includes/footer.php';
+include("includes/footer.php");
 ?>

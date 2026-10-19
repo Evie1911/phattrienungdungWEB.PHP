@@ -1,10 +1,10 @@
 <?php
-require_once '../../config.php';
+require_once '../config.php';
 $pageTitle = "Quản lý người dùng";
 
-include '../../includes/header.php';
-include '../../includes/sidebar.php';
-include '../../includes/navbar.php';
+include("includes/header.php");
+include("includes/sidebar.php");
+include("includes/navbar.php");
 ?>
 <main class="main-content">
     <div class="content-card">
@@ -13,7 +13,7 @@ include '../../includes/navbar.php';
                 <h1>Quản Lý Người Dùng</h1>
                 <p>Phân quyền, quản lý tài khoản và trạng thái hoạt động</p>
             </div>
-            <a href="<?php echo BASE_URL; ?>/page/nguoidung/addnguoidung.php" class="btn-primary" title="Thêm người dùng mới">
+            <a href="<?php echo BASE_URL; ?>/addnguoidung.php" class="btn-primary" title="Thêm người dùng mới">
                 <i class="fa-solid fa-plus"></i> <span>Thêm người dùng mới</span>
             </a>
         </div>
@@ -199,5 +199,5 @@ include '../../includes/navbar.php';
 </main>
 
 <?php
-include '../../includes/footer.php';
+include("includes/footer.php");
 ?>

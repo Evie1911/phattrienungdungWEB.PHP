@@ -20,13 +20,13 @@
         <!-- Danh sách các chức năng trong menu -->
         <div class="sidebar-menu">
             <div class="menu-category">HỆ THỐNG</div>
-            <a href="<?php echo BASE_URL; ?>/page/thongke/thongke.php" class="menu-item active"><i class="fa-solid fa-chart-pie"></i><span>Bảng điều khiển</span></a>
-            <a href="<?php echo BASE_URL; ?>/page/sanpham/danhsachsanpham.php" class="menu-item"><i class="fa-solid fa-mobile-screen-button"></i><span>Quản lý sản phẩm</span></a>
-            <a href="<?php echo BASE_URL; ?>/page/danhmuc/danhsachdanhmuc.php" class="menu-item"><i class="fa-solid fa-list"></i><span>Quản lý danh mục</span></a>
-            <a href="<?php echo BASE_URL; ?>/page/muahang/donhang.php" class="menu-item"><i class="fa-solid fa-cart-shopping"></i><span>Quản lý đơn hàng</span></a>
-            <a href="<?php echo BASE_URL; ?>/page/muahang/thanhtoan.php" class="menu-item"><i class="fa-solid fa-credit-card"></i><span>Quản lý thanh toán</span></a>
-            <a href="<?php echo BASE_URL; ?>/page/nguoidung/qlnguoidung.php" class="menu-item"><i class="fa-solid fa-users"></i><span>Quản lý người dùng</span></a>
-            <a href="<?php echo BASE_URL; ?>/page/baiviet/baiviet.php" class="menu-item"><i class="fa-solid fa-newspaper"></i><span>Bài viết</span></a>
+            <a href="<?php echo BASE_URL; ?>/thongke.php" class="menu-item active"><i class="fa-solid fa-chart-pie"></i><span>Bảng điều khiển</span></a>
+            <a href="<?php echo BASE_URL; ?>/danhsachsanpham.php" class="menu-item"><i class="fa-solid fa-mobile-screen-button"></i><span>Quản lý sản phẩm</span></a>
+            <a href="<?php echo BASE_URL; ?>/danhsachdanhmuc.php" class="menu-item"><i class="fa-solid fa-list"></i><span>Quản lý danh mục</span></a>
+            <a href="<?php echo BASE_URL; ?>/donhang.php" class="menu-item"><i class="fa-solid fa-cart-shopping"></i><span>Quản lý đơn hàng</span></a>
+            <a href="<?php echo BASE_URL; ?>/thanhtoan.php" class="menu-item"><i class="fa-solid fa-credit-card"></i><span>Quản lý thanh toán</span></a>
+            <a href="<?php echo BASE_URL; ?>/qlnguoidung.php" class="menu-item"><i class="fa-solid fa-users"></i><span>Quản lý người dùng</span></a>
+            <a href="<?php echo BASE_URL; ?>/baiviet.php" class="menu-item"><i class="fa-solid fa-newspaper"></i><span>Bài viết</span></a>
             <a href="#" class="menu-item"><i class="fa-solid fa-gears"></i><span>Cài đặt hệ thống</span></a>
         </div>
     </div>

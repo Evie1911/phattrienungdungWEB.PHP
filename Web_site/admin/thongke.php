@@ -1,12 +1,12 @@
 <?php
-require_once '../../config.php';
+require_once '../config.php';
 // Cấu hình tiêu đề động cho trang
 $pageTitle = "Trang chủ - Thống kê";
 
 //Các thành phần giao diện
-include '../../includes/header.php';
-include '../../includes/sidebar.php';
-include '../../includes/navbar.php';
+include 'includes/header.php';
+include 'includes/sidebar.php';
+include 'includes/navbar.php';
 ?>
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/data.css">
 
@@ -171,7 +171,6 @@ include '../../includes/navbar.php';
 </main>
 
 
-
 <?php
-include '../../includes/footer.php';
+include 'includes/footer.php';
 ?>

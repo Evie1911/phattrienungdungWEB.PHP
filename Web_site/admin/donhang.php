@@ -1,13 +1,13 @@
 <?php
-require_once '../../config.php';
+require_once '../config.php';
 
 // Cấu hình tiêu đề động cho trang
 $pageTitle = "Quản lý đơn hàng";
 
 // Các thành phần giao diện
-include '../../includes/header.php';
-include '../../includes/sidebar.php';
-include '../../includes/navbar.php';
+include("includes/header.php");
+include("includes/sidebar.php");
+include("includes/navbar.php");
 ?>
 
 
@@ -270,5 +270,5 @@ include '../../includes/navbar.php';
 </main>
 
 <?php
-include '../../includes/footer.php';
+include("includes/footer.php");
 ?>

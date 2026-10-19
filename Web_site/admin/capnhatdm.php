@@ -1,13 +1,13 @@
 <?php
-require_once '../../config.php';
+require_once '../config.php';
 
 // Cấu hình tiêu đề trang
 $pageTitle = "Cập nhật danh mục";
 
 // Nhúng các thành phần giao diện chung
-include '../../includes/header.php';
-include '../../includes/sidebar.php';
-include '../../includes/navbar.php';
+include("includes/header.php");
+include("includes/sidebar.php");
+include("includes/navbar.php");
 
 ?>
 
@@ -20,7 +20,7 @@ include '../../includes/navbar.php';
                 <h1>Cập nhật danh mục</h1>
             </div>
             <div class="product-breadcrumb">
-                <a href="<?php echo BASE_URL; ?>/page/danhmuc/danhsachdanhmuc.php">Danh Sách Danh Mục</a> / <span>Cập Nhật Danh Mục</span>
+                <a href="<?php echo BASE_URL; ?>/danhsachdanhmuc.php">Danh Sách Danh Mục</a> / <span>Cập Nhật Danh Mục</span>
             </div>
         </div>
 
@@ -63,14 +63,14 @@ include '../../includes/navbar.php';
             <div class="product-form-actions">
                 <button type="submit" class="btn-submit-save nutLuu"
                     data-type="danh mục"
-                    data-redirect="<?php echo BASE_URL; ?>/page/danhmuc/danhsachdanhmuc.php">
+                    data-redirect="<?php echo BASE_URL; ?>/danhsachdanhmuc.php">
                     Lưu lại
                 </button>
 
                 <!-- Nút hủy bỏ -->
                 <a href=" index.php" class="btn-submit-cancel nutHuy"
                     data-type="danh mục"
-                    data-redirect="<?php echo BASE_URL; ?>/page/danhmuc/danhsachdanhmuc.php">
+                    data-redirect="<?php echo BASE_URL; ?>/danhsachdanhmuc.php">
                     Hủy bỏ
                 </a>
             </div>
@@ -81,5 +81,5 @@ include '../../includes/navbar.php';
 </main>
 
 <?php
-include '../../includes/footer.php';
+include("includes/footer.php");
 ?>

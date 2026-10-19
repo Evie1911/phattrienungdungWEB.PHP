@@ -1,13 +1,13 @@
 <?php
-require_once '../../config.php';
+require_once '../config.php';
 
 // Cấu hình tiêu đề trang
 $pageTitle = "Cập nhật bài viết";
 
 // Nhúng các thành phần giao diện chung
-include '../../includes/header.php';
-include '../../includes/sidebar.php';
-include '../../includes/navbar.php';
+include("includes/header.php");
+include("includes/sidebar.php");
+include("includes/navbar.php");
 ?>
 
 <main class="main-content" style="margin-top: 20px;">
@@ -19,13 +19,16 @@ include '../../includes/navbar.php';
                 <h1>Cập nhật bài viết: BV-101</h1>
             </div>
             <div class="product-breadcrumb">
-                <a href="<?php echo BASE_URL; ?>/page/baiviet/baiviet.php">Danh Sách Bài Viết</a> / <span>Cập Nhật Bài Viết</span>
+                <a href="<?php echo BASE_URL; ?>/baiviet.php">Danh Sách Bài Viết</a> / <span>Cập Nhật Bài Viết</span>
             </div>
         </div>
 
         <!-- Các nút bổ sung nhanh -->
         <div class="quick-action-group">
-            <button type="button" class="btn-quick-action">
+            <button type="button" class="btn-quick-action nut-them"
+                data-title="Thêm danh mục bài viết"
+                data-label="Tên danh mục bài viết"
+                data-success="Đã thêm danh mục bài viết thành công!">
                 <i class="fa-solid fa-plus"></i> Thêm danh mục bài viết
             </button>
         </div>
@@ -116,14 +119,14 @@ include '../../includes/navbar.php';
             <div class="product-form-actions">
                 <button type="submit" class="btn-submit-save nutLuu"
                     data-type="bài viết"
-                    data-redirect="<?php echo BASE_URL; ?>/page/baiviet/baiviet.php">
+                    data-redirect="<?php echo BASE_URL; ?>/baiviet.php">
                     Lưu lại
                 </button>
 
                 <!-- Nút hủy bỏ -->
                 <a href=" index.php" class="btn-submit-cancel nutHuy"
                     data-type="bài viết"
-                    data-redirect="<?php echo BASE_URL; ?>/page/baiviet/baiviet.php">
+                    data-redirect="<?php echo BASE_URL; ?>/baiviet.php">
                     Hủy bỏ
                 </a>
             </div>
@@ -134,5 +137,5 @@ include '../../includes/navbar.php';
 </main>
 
 <?php
-include '../../includes/footer.php';
+include("includes/footer.php");
 ?>

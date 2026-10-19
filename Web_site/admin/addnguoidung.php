@@ -1,13 +1,13 @@
 <?php
-require_once '../../config.php';
+require_once '../config.php';
 
 // Cấu hình tiêu đề trang
 $pageTitle = "Thêm người dùng";
 
 // Nhúng các thành phần giao diện chung
-include '../../includes/header.php';
-include '../../includes/sidebar.php';
-include '../../includes/navbar.php';
+include("includes/header.php");
+include("includes/sidebar.php");
+include("includes/navbar.php");
 ?>
 
 <main class="main-content" style="margin-top: 20px;">
@@ -18,7 +18,7 @@ include '../../includes/navbar.php';
                 <h1>Tạo mới người dùng</h1>
             </div>
             <div class="product-breadcrumb">
-                <a href="<?php echo BASE_URL; ?>/page/nguoidung/qlnguoidung.php">Danh Sách Người Dùng</a> / <span>Thêm Người Dùng</span>
+                <a href="<?php echo BASE_URL; ?>/qlnguoidung.php">Danh Sách Người Dùng</a> / <span>Thêm Người Dùng</span>
             </div>
         </div>
 
@@ -88,14 +88,14 @@ include '../../includes/navbar.php';
             <div class="product-form-actions" style="margin-top: 20px;">
                 <button type="submit" class="btn-submit-save nutLuu"
                     data-type="tài khoản"
-                    data-redirect="<?php echo BASE_URL; ?>/page/nguoidung/qlnguoidung.php">
+                    data-redirect="<?php echo BASE_URL; ?>/qlnguoidung.php">
                     Lưu lại
                 </button>
 
                 <!-- Nút hủy bỏ -->
                 <a href=" index.php" class="btn-submit-cancel nutHuy"
                     data-type="tài khoản"
-                    data-redirect="<?php echo BASE_URL; ?>/page/nguoidung/qlnguoidung.php">
+                    data-redirect="<?php echo BASE_URL; ?>/qlnguoidung.php">
                     Hủy bỏ
                 </a>
             </div>
@@ -106,5 +106,5 @@ include '../../includes/navbar.php';
 </main>
 
 <?php
-include '../../includes/footer.php';
+include("includes/footer.php");
 ?>

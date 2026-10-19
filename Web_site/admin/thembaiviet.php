@@ -1,13 +1,13 @@
 <?php
-require_once '../../config.php';
+require_once '../config.php';
 
 // Cấu hình tiêu đề trang
 $pageTitle = "Thêm bài viết mới";
 
 // Nhúng các thành phần giao diện chung
-include '../../includes/header.php';
-include '../../includes/sidebar.php';
-include '../../includes/navbar.php';
+include("includes/header.php");
+include("includes/sidebar.php");
+include("includes/navbar.php");
 ?>
 
 <main class="main-content" style="margin-top: 20px;">
@@ -19,7 +19,7 @@ include '../../includes/navbar.php';
                 <h1>Tạo mới bài viết</h1>
             </div>
             <div class="product-breadcrumb">
-                <a href="<?php echo BASE_URL; ?>/page/baiviet/baiviet.php">Danh Sách Bài Viết</a> / <span>Thêm Bài Viết</span>
+                <a href="<?php echo BASE_URL; ?>/baiviet.php">Danh Sách Bài Viết</a> / <span>Thêm Bài Viết</span>
             </div>
         </div>
 
@@ -107,14 +107,14 @@ include '../../includes/navbar.php';
             <div class="product-form-actions">
                 <button type="submit" class="btn-submit-save nutLuu"
                     data-type="bài viết"
-                    data-redirect="<?php echo BASE_URL; ?>/page/baiviet/baiviet.php">
+                    data-redirect="<?php echo BASE_URL; ?>/baiviet.php">
                     Lưu lại
                 </button>
 
                 <!-- Nút hủy bỏ -->
                 <a href=" index.php" class="btn-submit-cancel nutHuy"
                     data-type="bài viết"
-                    data-redirect="<?php echo BASE_URL; ?>/page/baiviet/baiviet.php">
+                    data-redirect="<?php echo BASE_URL; ?>/baiviet.php">
                     Hủy bỏ
                 </a>
             </div>
@@ -125,5 +125,5 @@ include '../../includes/navbar.php';
 </main>
 
 <?php
-include '../../includes/footer.php';
+include("includes/footer.php");
 ?>
