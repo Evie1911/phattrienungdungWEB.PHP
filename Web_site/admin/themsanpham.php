@@ -3,6 +3,7 @@ require_once '../config.php';
 include("xyly/xuly.php");
 
 $db = new xuly();
+$product_code = 'SP-' . rand(100, 999);
 
 // Xử lý PHP khi form được submit
 if (isset($_POST['nut'])) {
@@ -19,7 +20,7 @@ if (isset($_POST['nut'])) {
             $condition_text = $_REQUEST['condition_text'];
             $description    = $_REQUEST['description'];
 
-            $clean_stock = intval($stock); //so luong kho lam sach thanh so nguyen
+            $clean_stock = intval($stock); // Số lượng kho làm sạch thành số nguyên
 
             // Kiểm tra thông tin bắt buộc
             if ($sku != '' && $name != '' && $category_id != '' && $brand_id != '' && $price != '' && $stock !== '') {
@@ -54,7 +55,7 @@ if (isset($_POST['nut'])) {
                 // Câu lệnh INSERT
                 $sql = "INSERT INTO products (sku, category_id, brand_id, supplier_id, name, description, price, sale_price, stock, condition_text, image, created_at, updated_at) 
                         VALUES ('$sku', '$category_id', '$brand_id', $supplier_val, '$name', '$description', '$clean_price', " . ($clean_sale ? "'$clean_sale'" : "NULL") . ", 
-                        '$clean_stock', '$condition_text', $image_val, NOW(), NOW())";
+                        '$clean_stock', '$condition_text',$image_val, NOW(), NOW())";
 
                 // Thông báo kết quả bằng SweetAlert2
                 if ($db->themxoasua($sql)) {
@@ -145,12 +146,12 @@ include 'includes/navbar.php';
                 <i class="fa-solid fa-plus"></i> Thêm thương hiệu
             </button>
         </div>
-        <!-- Form chính -->
+
         <form id="productForm" action="" method="POST" enctype="multipart/form-data">
             <div class="product-form-grid">
                 <div class="product-field-group">
                     <label>Mã sản phẩm (SKU)</label>
-                    <input type="text" name="product_code" class="product-input" placeholder="Nhập mã SKU..." required>
+                    <input type="text" name="product_code" class="product-input" value="<?php echo $product_code; ?>" readonly style="background-color: #f1f5f9; cursor: not-allowed;" required>
                 </div>
                 <div class="product-field-group">
                     <label>Tên sản phẩm</label>
@@ -158,7 +159,7 @@ include 'includes/navbar.php';
                 </div>
                 <div class="product-field-group">
                     <label>Số lượng kho</label>
-                    <input type="text" name="quantity" class="product-input" placeholder="Số lượng ....." required>
+                    <input type="number" name="quantity" class="product-input" placeholder="Số lượng ....." required>
                 </div>
                 <div class="product-field-group">
                     <label>Tình trạng</label>
@@ -207,8 +208,10 @@ include 'includes/navbar.php';
                     <label>Ảnh sản phẩm</label>
                     <label class="btn-file-upload">
                         <i class="fa-solid fa-cloud-arrow-up"></i> Chọn ảnh
-                        <input type="file" name="product_image" style="display: none;" accept="image/*">
+                        <input type="file" name="product_image" style="display: none;" accept="image/*"
+                            onchange="document.getElementById('hiententen').innerText = this.files.length > 0 ? this.files[0].name : ''">
                     </label>
+                    <span id="hiententen" style="font-size: 14px; color: #0f172a; font-weight: 500; font-style: italic;"></span>
                 </div>
                 <div class="product-field-group span-4">
                     <label>Mô tả sản phẩm</label>
@@ -218,7 +221,7 @@ include 'includes/navbar.php';
 
             <div class="product-form-actions">
                 <button type="submit" class="btn-submit-save">Lưu lại</button>
-                <a href=" index.php" class="btn-submit-cancel nutHuy"
+                <a href="<?php echo BASE_URL; ?>/danhsachsanpham.php" class="btn-submit-cancel nutHuy"
                     data-type="sản phẩm"
                     data-redirect="<?php echo BASE_URL; ?>/danhsachsanpham.php">
                     Hủy bỏ
@@ -228,10 +231,9 @@ include 'includes/navbar.php';
     </div>
 </main>
 
-<!-- Đoạn JavaScript xác nhận trước khi submit -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 1. Xử lý submit form thêm sản phẩm có hỏi xác nhận
+        // Xử lý submit form thêm sản phẩm
         const productForm = document.getElementById('productForm');
         if (productForm) {
             productForm.addEventListener('submit', function(e) {
@@ -240,7 +242,7 @@ include 'includes/navbar.php';
 
                 Swal.fire({
                     title: 'Xác nhận thêm sản phẩm?',
-                    text: " Bạn có muốn thêm sản phẩm này vào hệ thống không?",
+                    text: "Bạn có muốn thêm sản phẩm này vào hệ thống không?",
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
@@ -261,7 +263,7 @@ include 'includes/navbar.php';
             });
         }
 
-        // 2. Xử lý các nút thêm nhanh (Nhà cung cấp, Danh mục, Thương hiệu/Tình trạng) bằng AJAX
+        // Xử lý các nút thêm nhanh (Nhà cung cấp, Danh mục, Thương hiệu) bằng AJAX
         document.querySelectorAll(".nut-them").forEach((button) => {
             button.addEventListener("click", function(e) {
                 e.preventDefault();

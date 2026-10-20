@@ -9,9 +9,29 @@ $p = new xuly();
 if (isset($_REQUEST['nut']) && $_REQUEST['nut'] === 'Xóa danh mục') {
     $myid = isset($_REQUEST['txtid']) ? intval($_REQUEST['txtid']) : 0;
     if ($myid > 0) {
-        if ($p->themxoasua("DELETE FROM categories WHERE id='$myid' LIMIT 1")) {
-            header("Location: danhsachdanhmuc.php?msg=deleted");
-            exit();
+        // Kiểm tra xem danh mục này có chứa sản phẩm nào không
+        $kiemtra_sp = $p->xuatdulieu("SELECT COUNT(*) as soluong FROM products WHERE category_id = '$myid'");
+        $so_luong_sp = !empty($kiemtra_sp) ? intval($kiemtra_sp[0]['soluong']) : 0;
+
+        if ($so_luong_sp > 0) {
+            echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
+            echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Không thể xóa!",
+                        text: "Danh mục này vẫn còn sản phẩm bên trong. Vui lòng xóa hoặc chuyển sản phẩm sang danh mục khác trước khi xóa danh mục này.",
+                        confirmButtonText: "Đã hiểu"
+                    }).then(() => {
+                        window.location.href = "danhsachdanhmuc.php";
+                    });
+                });
+            </script>';
+        } else {
+            if ($p->themxoasua("DELETE FROM categories WHERE id='$myid' LIMIT 1")) {
+                header("Location: danhsachdanhmuc.php?msg=deleted");
+                exit();
+            }
         }
     }
 }

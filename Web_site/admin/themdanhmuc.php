@@ -3,8 +3,8 @@ require_once '../config.php';
 include("xyly/xuly.php");
 
 $p = new xuly();
+$auto_code = 'DM-' . rand(100, 999);
 
-// Xử lý PHP khi form danh mục được submit
 if (isset($_POST['nut'])) {
     switch ($_POST['nut']) {
         case 'Thêm danh mục':
@@ -41,7 +41,7 @@ if (isset($_POST['nut'])) {
                 $sql = "INSERT INTO categories (category_code, name, slug, description, image, status) 
                         VALUES ('$category_code', '$category_name', '$slug', '$description', $image_val, 1)";
 
-                // Thông báo kết quả bằng SweetAlert2 và chuyển hướng sạch
+                // Thông báo kết quả
                 if ($p->themxoasua($sql)) {
                     echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
@@ -82,10 +82,8 @@ if (isset($_POST['nut'])) {
     }
 }
 
-// Cấu hình tiêu đề trang
 $pageTitle = "Thêm danh mục";
 
-// Nhúng các thành phần giao diện chung
 include("includes/header.php");
 include("includes/sidebar.php");
 include("includes/navbar.php");
@@ -95,7 +93,6 @@ include("includes/navbar.php");
 <main class="main-content" style="margin-top: 20px;">
     <div class="form-scroll-container" style="background-color: white; padding: 20px; border-radius: 12px;">
 
-        <!-- Tiêu đề và đường dẫn -->
         <div class="product-header-wrap">
             <div class="product-title-area">
                 <h1>Tạo mới danh mục</h1>
@@ -105,38 +102,34 @@ include("includes/navbar.php");
             </div>
         </div>
 
-        <!-- Form chính -->
         <form id="categoryForm" action="" method="POST" enctype="multipart/form-data">
             <div class="product-form-grid">
-                <!-- Mã danh mục -->
                 <div class="product-field-group">
                     <label>Mã danh mục</label>
-                    <input type="text" name="category_code" class="product-input" placeholder="Ví dụ: DM-11..." required>
+                    <input type="text" name="category_code" class="product-input" value="<?php echo $auto_code; ?>" readonly style="background-color: #f1f5f9; cursor: not-allowed;" required>
                 </div>
 
-                <!-- Tên danh mục -->
                 <div class="product-field-group">
                     <label>Tên danh mục</label>
                     <input type="text" name="category_name" class="product-input" placeholder="Nhập tên danh mục..." required>
                 </div>
 
-                <!-- Ảnh danh mục -->
                 <div class="product-field-group span-4">
                     <label>Hình ảnh danh mục</label>
                     <label class="btn-file-upload">
                         <i class="fa-solid fa-cloud-arrow-up"></i> Chọn ảnh
-                        <input type="file" name="category_image" style="display: none;" accept="image/*">
+                        <input type="file" name="category_image" style="display: none;" accept="image/*"
+                            onchange="document.getElementById('hiententen').innerText = this.files.length > 0 ? this.files[0].name : ''">
                     </label>
+                    <span id="hiententen" style="font-size: 14px; color: #0f172a; font-weight: 500; font-style: italic;"></span>
                 </div>
 
-                <!-- Mô tả danh mục -->
                 <div class="product-field-group span-4">
                     <label>Mô tả danh mục</label>
                     <textarea name="description" class="product-input" placeholder="Nhập mô tả chi tiết danh mục..."></textarea>
                 </div>
             </div>
 
-            <!-- Nút hành động Lưu & Hủy -->
             <div class="product-form-actions">
                 <button type="submit" class="btn-submit-save">Lưu lại</button>
                 <a href="<?php echo BASE_URL; ?>/danhsachdanhmuc.php" class="btn-submit-cancel nutHuy"
@@ -149,7 +142,6 @@ include("includes/navbar.php");
 
     </div>
 </main>
-<!-- JavaScript xử lý hộp thoại xác nhận form danh mục -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const categoryForm = document.getElementById('categoryForm');
