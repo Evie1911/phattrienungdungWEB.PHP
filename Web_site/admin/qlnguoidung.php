@@ -1,11 +1,75 @@
 <?php
 require_once '../config.php';
+include("xyly/xuly.php");
+
+$p = new xuly();
+
+//Xử lý cập nhật quyền (role) hoặc trạng thái (status) qua AJAX
+if (isset($_POST['action'])) {
+    $user_id = intval($_POST['user_id']);
+
+    if ($_POST['action'] === 'update_role') {
+        $role = $_POST['role'];
+        if (in_array($role, ['admin', 'customer'])) {
+            $sql = "UPDATE users SET role = '$role' WHERE id = '$user_id' LIMIT 1";
+            if ($p->themxoasua($sql)) {
+                echo json_encode(['status' => 'success', 'message' => 'Cập nhật quyền thành công!']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Không thể cập nhật quyền!']);
+            }
+        }
+        exit();
+    }
+
+    if ($_POST['action'] === 'update_status') {
+        $status = $_POST['status'];
+        if (in_array($status, ['active', 'locked'])) {
+            $sql = "UPDATE users SET status = '$status' WHERE id = '$user_id' LIMIT 1";
+            if ($p->themxoasua($sql)) {
+                echo json_encode(['status' => 'success', 'message' => 'Cập nhật trạng thái tài khoản thành công!']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Không thể cập nhật trạng thái!']);
+            }
+        }
+        exit();
+    }
+}
+
+//Nhận dữ liệu tìm kiếm và lọc từ form GET
+$search_keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+$role_filter    = isset($_GET['role']) ? trim($_GET['role']) : '';
+$status_filter  = isset($_GET['status']) ? trim($_GET['status']) : '';
+
+//Xây dựng câu truy vấn danh sách người dùng kèm đếm số lượng đơn hàng
+$sql_users = "SELECT u.*, 
+              (SELECT COUNT(*) FROM orders WHERE user_id = u.id) as total_orders 
+              FROM users u WHERE 1=1";
+
+if ($search_keyword !== '') {
+    $keyword_esc = addslashes($search_keyword);
+    $sql_users .= " AND u.full_name LIKE '%$keyword_esc%'";
+}
+
+if ($role_filter !== '') {
+    $role_esc = addslashes($role_filter);
+    $sql_users .= " AND u.role = '$role_esc'";
+}
+
+if ($status_filter !== '') {
+    $status_esc = addslashes($status_filter);
+    $sql_users .= " AND u.status = '$status_esc'";
+}
+
+$sql_users .= " ORDER BY u.created_at DESC";
+$list_users = $p->xuatdulieu($sql_users);
+
 $pageTitle = "Quản lý người dùng";
 
 include("includes/header.php");
 include("includes/sidebar.php");
 include("includes/navbar.php");
 ?>
+
 <main class="main-content">
     <div class="content-card">
         <div class="page-header">
@@ -18,25 +82,29 @@ include("includes/navbar.php");
             </a>
         </div>
 
-        <!-- Thanh tìm kiếm và bộ lọc -->
-        <div class="filter-section">
-            <div class="search-box">
-                <input type="text" placeholder="Tìm kiếm theo tên, email, SĐT...">
+        <form method="GET" action="" class="filter-section" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div class="search-box" style="flex: 1; min-width: 250px;">
+                <input type="text" name="keyword" value="<?php echo htmlspecialchars($search_keyword); ?>" placeholder="Tìm kiếm theo mã, tên, email, SĐT..." style="width: 100%; padding: 10px 14px;" class="product-input">
             </div>
-            <select class="filter-select">
-                <option value="">-- Tất cả quyền --</option>
-                <option value="admin">Admin (Quản trị viên)</option>
-                <option value="customer">Khách hàng</option>
-            </select>
-            <select class="filter-select">
-                <option value="">-- Trạng thái --</option>
-                <option value="active">Hoạt động</option>
-                <option value="locked">Đã khóa</option>
-            </select>
-            <button class="btn-filter">Lọc</button>
-        </div>
 
-        <!-- Bảng danh sách người dùng -->
+            <select name="role" class="filter-select product-input" style="width: 180px; padding: 10px;">
+                <option value="">-- Tất cả quyền --</option>
+                <option value="admin" <?php echo ($role_filter === 'admin') ? 'selected' : ''; ?>>Admin (Quản trị)</option>
+                <option value="customer" <?php echo ($role_filter === 'customer') ? 'selected' : ''; ?>>Khách hàng</option>
+            </select>
+
+            <select name="status" class="filter-select product-input" style="width: 180px; padding: 10px;">
+                <option value="">-- Trạng thái --</option>
+                <option value="active" <?php echo ($status_filter === 'active') ? 'selected' : ''; ?>>Hoạt động</option>
+                <option value="locked" <?php echo ($status_filter === 'locked') ? 'selected' : ''; ?>>Đã khóa</option>
+            </select>
+
+            <button type="submit" class="btn-filter" style="padding: 10px 20px; cursor: pointer;">Lọc</button>
+            <?php if ($search_keyword !== '' || $role_filter !== '' || $status_filter !== ''): ?>
+                <a href="qlnguoidung.php" style="text-decoration: none;">Làm mới</a>
+            <?php endif; ?>
+        </form>
+
         <div class="table-container">
             <table>
                 <thead>
@@ -52,151 +120,114 @@ include("includes/navbar.php");
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><strong>TK-01</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;">Nguyễn Văn An</span></td>
-                        <td>an.nguyen@email.com</td>
-                        <td>0901234567</td>
-                        <td>12</td>
-                        <td>
-                            <select class="role-select">
-                                <option value="admin" selected>Admin</option>
-                                <option value="customer">Khách hàng</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="role-select status-action-select">
-                                <option value="active">Mở khóa (Hoạt động)</option>
-                                <option value="locked" selected>Khóa tài khoản</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>TK-02</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;">Trần Thị Bình</span></td>
-                        <td>binh.tran@email.com</td>
-                        <td>0912345678</td>
-                        <td>3</td>
-                        <td>
-                            <select class="role-select">
-                                <option value="admin" selected>Admin</option>
-                                <option value="customer">Khách hàng</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="role-select status-action-select">
-                                <option value="active" selected>Mở khóa (Hoạt động)</option>
-                                <option value="locked">Khóa tài khoản</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>TK-03</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;">Lê Hoàng Nam</span></td>
-                        <td>nam.le@email.com</td>
-                        <td>0988887777</td>
-                        <td>5</td>
-                        <td>
-                            <select class="role-select">
-                                <option value="admin" selected>Admin</option>
-                                <option value="customer">Khách hàng</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="role-select status-action-select">
-                                <option value="active" selected>Mở khóa (Hoạt động)</option>
-                                <option value="locked">Khóa tài khoản</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>TK-04</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;">Phạm Thị Mai</span></td>
-                        <td>mai.pham@email.com</td>
-                        <td>0933334444</td>
-                        <td>0</td>
-                        <td>
-                            <select class="role-select">
-                                <option value="admin" selected>Admin</option>
-                                <option value="customer">Khách hàng</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="role-select status-action-select">
-                                <option value="active">Mở khóa (Hoạt động)</option>
-                                <option value="locked" selected>Khóa tài khoản</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>TK-05</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;">Hoàng Văn Hùng</span></td>
-                        <td>hung.hoang@email.com</td>
-                        <td>0977112233</td>
-                        <td>8</td>
-                        <td>
-                            <select class="role-select">
-                                <option value="admin" selected>Admin</option>
-                                <option value="customer">Khách hàng</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="role-select status-action-select">
-                                <option value="active" selected>Mở khóa (Hoạt động)</option>
-                                <option value="locked">Khóa tài khoản</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>TK-06</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;">Vũ Thu Trang</span></td>
-                        <td>trang.vu@email.com</td>
-                        <td>0966554433</td>
-                        <td>2</td>
-                        <td>
-                            <select class="role-select">
-                                <option value="admin" selected>Admin</option>
-                                <option value="customer">Khách hàng</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="role-select status-action-select">
-                                <option value="active" selected>Mở khóa (Hoạt động)</option>
-                                <option value="locked">Khóa tài khoản</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>TK-07</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;">Đặng Minh Tuấn</span></td>
-                        <td>tuan.dang@email.com</td>
-                        <td>0944556677</td>
-                        <td>15</td>
-                        <td>
-                            <select class="role-select">
-                                <option value="admin" selected>Admin</option>
-                                <option value="customer">Khách hàng</option>
-                            </select>
-                        </td>
-                        <td>
-                            <select class="role-select status-action-select">
-                                <option value="active">Mở khóa (Hoạt động)</option>
-                                <option value="locked" selected>Khóa tài khoản</option>
-                            </select>
-                        </td>
-                    </tr>
+                    <?php if (!empty($list_users)): ?>
+                        <?php foreach ($list_users as $usr): ?>
+                            <tr>
+                                <td><strong><?php echo htmlspecialchars($usr['user_code']); ?></strong></td>
+                                <td>
+                                    <?php if (!empty($usr['avatar'])): ?>
+                                        <img src="../uploads/avatar/<?php echo htmlspecialchars($usr['avatar']); ?>" alt="Avatar" class="product-img" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
+                                    <?php else: ?>
+                                        <img src="../uploads/avatar/null.jpg<?php echo htmlspecialchars($usr['avatar']); ?>" alt="Avatar" class="product-img" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
+                                    <?php endif; ?>
+                                </td>
+                                <td><span style="font-weight: 600; color: #0f172a;"><?php echo htmlspecialchars($usr['full_name']); ?></span></td>
+                                <td><?php echo htmlspecialchars($usr['email']); ?></td>
+                                <td><?php echo htmlspecialchars($usr['phone']); ?></td>
+                                <td style="text-align: center; font-weight: bold;"><?php echo intval($usr['total_orders']); ?></td>
+                                <td>
+                                    <select class="role-select product-input" data-id="<?php echo $usr['id']; ?>" style="padding: 6px;">
+                                        <option value="admin" <?php echo ($usr['role'] === 'admin') ? 'selected' : ''; ?>>Admin</option>
+                                        <option value="customer" <?php echo ($usr['role'] === 'customer') ? 'selected' : ''; ?>>Khách hàng</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="role-select status-action-select product-input" data-id="<?php echo $usr['id']; ?>" style="padding: 6px;">
+                                        <option value="active" <?php echo ($usr['status'] === 'active') ? 'selected' : ''; ?>>Mở khóa (Hoạt động)</option>
+                                        <option value="locked" <?php echo ($usr['status'] === 'locked') ? 'selected' : ''; ?>>Khóa tài khoản</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: #64748b; padding: 20px;">Không tìm thấy tài khoản người dùng nào phù hợp.</td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Xử lý đổi quyền (role)
+        document.querySelectorAll(".role-select:not(.status-action-select)").forEach(function(select) {
+            select.addEventListener("change", function() {
+                const userId = this.getAttribute("data-id");
+                const newRole = this.value;
+
+                fetch(window.location.href, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `action=update_role&user_id=${userId}&role=${encodeURIComponent(newRole)}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: data.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        } else {
+                            Swal.fire("Lỗi!", data.message, "error");
+                        }
+                    });
+            });
+        });
+
+        // Xử lý khóa / mở tài khoản (status)
+        document.querySelectorAll(".status-action-select").forEach(function(select) {
+            select.addEventListener("change", function() {
+                const userId = this.getAttribute("data-id");
+                const newStatus = this.value;
+                const selectElem = this;
+
+                fetch(window.location.href, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `action=update_status&user_id=${userId}&status=${encodeURIComponent(newStatus)}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: data.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then.then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire("Lỗi!", data.message, "error");
+                        }
+                    });
+            });
+        });
+    });
+</script>
 
 <?php
 include("includes/footer.php");

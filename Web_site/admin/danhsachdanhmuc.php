@@ -55,7 +55,7 @@ include("includes/navbar.php");
 ?>
 <main class="main-content">
     <div class="content-card">
-        <!-- Tiêu đề trang & Nút hành động -->
+
         <div class="page-header">
             <div class="page-title">
                 <h1>Quản Lý Danh Mục</h1>
@@ -66,7 +66,6 @@ include("includes/navbar.php");
             </a>
         </div>
 
-        <!-- Thanh tìm kiếm -->
         <form method="GET" action="" class="filter-section">
             <div class="search-box" style="flex: 1;">
                 <input type="text" name="search" placeholder="Tìm theo tên danh mục, mã..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">

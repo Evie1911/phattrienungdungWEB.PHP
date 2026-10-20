@@ -1,19 +1,98 @@
 <?php
 require_once '../config.php';
+include("xyly/xuly.php");
 
-// Cấu hình tiêu đề động cho trang
+$p = new xuly();
+
+// Xử lý cập nhật trạng thái đơn hàng
+if (isset($_POST['action']) && $_POST['action'] === 'update_status') {
+    $order_id = intval($_POST['order_id']);
+    $new_status = $_POST['status'];
+    $status_order = [
+        'Chờ xác nhận' => 1,
+        'Đã xác nhận' => 2,
+        'Đang đóng gói' => 3,
+        'Đang giao hàng' => 4,
+        'Hoàn thành' => 5,
+        'Đã hủy' => 6,
+    ];
+    // Lấy trạng thái hiện tại trong database
+    $current_order = $p->xuatdulieu("SELECT order_status FROM orders WHERE id = '$order_id' LIMIT 1");
+    if (!empty($current_order)) {
+        $old_status = $current_order[0]['order_status'];
+        // Nếu trạng thái cũ là 'Đã hủy' thì không cho sửa nữa
+        if ($old_status === 'Đã hủy' || $old_status === 'Hoàn thành') {
+            echo json_encode(['status' => 'error', 'message' => 'Đơn hàng đã kết thúc, không thể thay đổi trạng thái!']);
+            exit();
+        }
+        // Kiểm tra nếu không phải chuyển sang 'Đã hủy' và cấp độ mới nhỏ hơn cấp độ cũ (quay đầu)
+        if ($new_status !== 'Đã hủy' && isset($status_order[$old_status]) && isset($status_order[$new_status])) {
+            if ($status_order[$new_status] < $status_order[$old_status]) {
+                echo json_encode(['status' => 'error', 'message' => 'Không thể quay lại trạng thái cũ!']);
+                exit();
+            }
+        }
+        // Tiến hành cập nhật nếu hợp lệ
+        $update_sql = "UPDATE orders SET order_status = '$new_status' WHERE id = '$order_id' LIMIT 1";
+        if ($p->themxoasua($update_sql)) {
+            echo json_encode(['status' => 'success', 'message' => 'Cập nhật trạng thái thành công!']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Không thể cập nhật trạng thái!']);
+        }
+    }
+    exit();
+}
+
+// Xử lý lấy chi tiết đơn hàng
+if (isset($_GET['action']) && $_GET['action'] === 'get_order_detail') {
+    $order_id = intval($_GET['id']);
+    // Lấy thông tin đơn hàng và thanh toán
+    $order_info = $p->xuatdulieu("SELECT * FROM orders o LEFT JOIN payments p ON o.id = p.order_id WHERE o.id = '$order_id' LIMIT 1");
+    // Lấy danh sách sản phẩm trong đơn hàng
+    $order_items = $p->xuatdulieu("SELECT * FROM order_items WHERE order_id = '$order_id'");
+
+    if (!empty($order_info)) {
+        echo json_encode([
+            'status' => 'success',
+            'order' => $order_info[0],
+            'items' => $order_items
+        ]);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy đơn hàng!']);
+    }
+    exit();
+}
+//Bộ lọc don hang
+$search_keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
+$status_filter  = isset($_GET['status']) ? trim($_GET['status']) : '';
+// Truy vấn danh sách đơn hàng từ Tổng số lượng sản phẩm trong đơn hàng Tên sản phẩm đầu tiên đơn hàng
+$sql_orders = "SELECT o.*,
+               (SELECT SUM(quantity) FROM order_items WHERE order_id = o.id) as total_qty,
+               (SELECT product_name FROM order_items WHERE order_id = o.id LIMIT 1) as first_product_name
+               FROM orders o WHERE 1=1";
+
+if ($search_keyword !== '') {
+    $keyword_esc = addslashes($search_keyword);
+    $sql_orders .= " AND (o.order_code LIKE '%$keyword_esc%' OR o.receiver_name LIKE '%$keyword_esc%' OR o.phone LIKE '%$keyword_esc%')";
+}
+if ($status_filter !== '') {
+    $status_esc = addslashes($status_filter);
+    $sql_orders .= " AND o.order_status = '$status_esc'";
+}
+
+$sql_orders .= " ORDER BY o.created_at DESC";
+
+$list_orders = $p->xuatdulieu($sql_orders);
+
 $pageTitle = "Quản lý đơn hàng";
 
-// Các thành phần giao diện
 include("includes/header.php");
 include("includes/sidebar.php");
 include("includes/navbar.php");
 ?>
 
-
 <main class="main-content">
     <div class="content-card">
-        <!-- Tiêu đề trang & Nút hành động -->
         <div class="page-header">
             <div class="page-title">
                 <h1>Quản Lý Đơn Hàng</h1>
@@ -21,31 +100,32 @@ include("includes/navbar.php");
             </div>
         </div>
 
-        <!-- Thanh tìm kiếm và bộ lọc -->
-        <div class="filter-section">
-            <div class="search-box" style="flex: 1;">
-                <input type="text" placeholder="Tìm theo mã đơn hàng, tên khách hàng, số điện thoại...">
-            </div>
-            <select class="filter-select">
-                <option value="">-- Trạng thái đơn hàng --</option>
-                <option value="pending">Chờ xác nhận</option>
-                <option value="confirmed">Đã xác nhận</option>
-                <option value="packing">Đang đóng gói</option>
-                <option value="shipping">Đang giao hàng</option>
-                <option value="completed">Hoàn thành</option>
-                <option value="cancelled">Đã hủy</option>
-            </select>
-            <button class="btn-filter">Lọc</button>
-        </div>
+            <form method="GET" action="" class="filter-section">
+                <div class="search-box" style="flex: 1;">
+                    <input type="text" name="keyword" id="searchOrderInput" value="<?php echo htmlspecialchars($search_keyword); ?>" placeholder="Tìm theo mã đơn hàng, tên khách hàng, số điện thoại...">
+                </div>
+                <select name="status" class="filter-select" id="filterStatus">
+                    <option value="">-- Trạng thái đơn hàng --</option>
+                    <option value="Chờ xác nhận" <?php echo ($status_filter === 'Chờ xác nhận') ? 'selected' : ''; ?>>Chờ xác nhận</option>
+                    <option value="Đã xác nhận" <?php echo ($status_filter === 'Đã xác nhận') ? 'selected' : ''; ?>>Đã xác nhận</option>
+                    <option value="Đang đóng gói" <?php echo ($status_filter === 'Đang đóng gói') ? 'selected' : ''; ?>>Đang đóng gói</option>
+                    <option value="Đang giao hàng" <?php echo ($status_filter === 'Đang giao hàng') ? 'selected' : ''; ?>>Đang giao hàng</option>
+                    <option value="Hoàn thành" <?php echo ($status_filter === 'Hoàn thành') ? 'selected' : ''; ?>>Hoàn thành</option>
+                    <option value="Đã hủy" <?php echo ($status_filter === 'Đã hủy') ? 'selected' : ''; ?>>Đã hủy</option>
+                </select>
+                <button type="submit" class="btn-filter">Tìm kiếm</button>
+                <?php if ($search_keyword !== '' || $status_filter !== ''): ?>
+                    <a href="donhang.php" style="text-decoration: none;">Làm mới</a>
+                <?php endif; ?>
+            </form>
 
-        <!-- Bảng danh sách đơn hàng -->
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>ID đơn hàng</th>
+                        <th>Mã đơn hàng</th>
                         <th>Khách hàng</th>
-                        <th>Đơn hàng</th>
+                        <th>Sản phẩm chính</th>
                         <th>Số lượng</th>
                         <th>Tổng tiền</th>
                         <th>Tình trạng</th>
@@ -53,221 +133,188 @@ include("includes/navbar.php");
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><strong>DH-9012</strong></td>
-                        <td>
-                            <div class="customer-name">Nguyễn Văn A</div>
-                            <div class="customer-phone">0901234567</div>
-                        </td>
-                        <td>iPhone 15 Pro Max 256GB</td>
-                        <td>1</td>
-                        <td><strong>29.990.000 đ</strong></td>
-                        <td>
-                            <select class="product-input status-select status-confirmed">
-                                <option value="confirmed" selected>Đã xác nhận</option>
-                                <option value="packing">Đang đóng gói</option>
-                                <option value="shipping">Đang giao hàng</option>
-                                <option value="completed">Hoàn thành</option>
-                                <option value="cancelled">Đã hủy</option>
-                            </select>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="#" class="btn-action btn-view btn-action-view" title="Xem chi tiết">
-                                    <i class="fa-regular fa-eye"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>DH-9013</strong></td>
-                        <td>
-                            <div class="customer-name">Trần Thị B</div>
-                            <div class="customer-phone">0912345678</div>
-                        </td>
-                        <td>Samsung Galaxy S24 Ultra</td>
-                        <td>1</td>
-                        <td><strong>26.990.000 đ</strong></td>
-                        <td>
-                            <select class="product-input status-select status-shipping">
-                                <option value="confirmed">Đã xác nhận</option>
-                                <option value="packing">Đang đóng gói</option>
-                                <option value="shipping" selected>Đang giao hàng</option>
-                                <option value="completed">Hoàn thành</option>
-                                <option value="cancelled">Đã hủy</option>
-                            </select>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="#" class="btn-action btn-action-view" title="Xem chi tiết">
-                                    <i class="fa-regular fa-eye"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>DH-9013</strong></td>
-                        <td>
-                            <div class="customer-name">Trần Thị B</div>
-                            <div class="customer-phone">0912345678</div>
-                        </td>
-                        <td>Samsung Galaxy S24 Ultra</td>
-                        <td>1</td>
-                        <td><strong>26.990.000 đ</strong></td>
-                        <td>
-                            <select class="product-input status-select status-shipping">
-                                <option value="confirmed">Đã xác nhận</option>
-                                <option value="packing">Đang đóng gói</option>
-                                <option value="shipping" selected>Đang giao hàng</option>
-                                <option value="completed">Hoàn thành</option>
-                                <option value="cancelled">Đã hủy</option>
-                            </select>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="#" class="btn-action btn-action-view" title="Xem chi tiết">
-                                    <i class="fa-regular fa-eye"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>DH-9013</strong></td>
-                        <td>
-                            <div class="customer-name">Trần Thị B</div>
-                            <div class="customer-phone">0912345678</div>
-                        </td>
-                        <td>Samsung Galaxy S24 Ultra</td>
-                        <td>1</td>
-                        <td><strong>26.990.000 đ</strong></td>
-                        <td>
-                            <select class="product-input status-select status-shipping">
-                                <option value="confirmed">Đã xác nhận</option>
-                                <option value="packing">Đang đóng gói</option>
-                                <option value="shipping" selected>Đang giao hàng</option>
-                                <option value="completed">Hoàn thành</option>
-                                <option value="cancelled">Đã hủy</option>
-                            </select>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="#" class="btn-action btn-action-view" title="Xem chi tiết">
-                                    <i class="fa-regular fa-eye"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>DH-9013</strong></td>
-                        <td>
-                            <div class="customer-name">Trần Thị B</div>
-                            <div class="customer-phone">0912345678</div>
-                        </td>
-                        <td>Samsung Galaxy S24 Ultra</td>
-                        <td>1</td>
-                        <td><strong>26.990.000 đ</strong></td>
-                        <td>
-                            <select class="product-input status-select status-shipping">
-                                <option value="confirmed">Đã xác nhận</option>
-                                <option value="packing">Đang đóng gói</option>
-                                <option value="shipping" selected>Đang giao hàng</option>
-                                <option value="completed">Hoàn thành</option>
-                                <option value="cancelled">Đã hủy</option>
-                            </select>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="#" class="btn-action btn-action-view" title="Xem chi tiết">
-                                    <i class="fa-regular fa-eye"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>DH-9014</strong></td>
-                        <td>
-                            <div class="customer-name">Lê Văn C</div>
-                            <div class="customer-phone">0988888888</div>
-                        </td>
-                        <td>Tai Nghe AirPods Pro 2</td>
-                        <td>2</td>
-                        <td><strong>11.980.000 đ</strong></td>
-                        <td>
-                            <select class="product-input status-select status-packing">
-                                <option value="confirmed">Đã xác nhận</option>
-                                <option value="packing" selected>Đang đóng gói</option>
-                                <option value="shipping">Đang giao hàng</option>
-                                <option value="completed">Hoàn thành</option>
-                                <option value="cancelled">Đã hủy</option>
-                            </select>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="#" class="btn-action btn-action-view" title="Xem chi tiết">
-                                    <i class="fa-regular fa-eye"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>DH-9015</strong></td>
-                        <td>
-                            <div class="customer-name">Phạm Thị D</div>
-                            <div class="customer-phone">0977777777</div>
-                        </td>
-                        <td>MacBook Pro 16" M3 Max</td>
-                        <td>1</td>
-                        <td><strong>69.990.000 đ</strong></td>
-                        <td>
-                            <select class="product-input status-select status-pending">
-                                <option value="pending" selected>Chờ xác nhận</option>
-                                <option value="confirmed">Đã xác nhận</option>
-                                <option value="packing">Đang đóng gói</option>
-                                <option value="shipping">Đang giao hàng</option>
-                                <option value="completed">Hoàn thành</option>
-                                <option value="cancelled">Đã hủy</option>
-                            </select>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="#" class="btn-action btn-action-view" title="Xem chi tiết">
-                                    <i class="fa-regular fa-eye"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>DH-9016</strong></td>
-                        <td>
-                            <div class="customer-name">Hoàng Văn E</div>
-                            <div class="customer-phone">0933333333</div>
-                        </td>
-                        <td>Sạc Nhanh Anker 20W</td>
-                        <td>3</td>
-                        <td><strong>1.050.000 đ</strong></td>
-                        <td>
-                            <select class="product-input status-select status-completed">
-                                <option value="pending">Chờ xác nhận</option>
-                                <option value="confirmed">Đã xác nhận</option>
-                                <option value="packing">Đang đóng gói</option>
-                                <option value="shipping">Đang giao hàng</option>
-                                <option value="completed" selected>Hoàn thành</option>
-                                <option value="cancelled">Đã hủy</option>
-                            </select>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="#" class="btn-action btn-action-view" title="Xem chi tiết">
-                                    <i class="fa-regular fa-eye"></i>
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
+                    <?php if (!empty($list_orders)): ?>
+                        <?php foreach ($list_orders as $ord): ?>
+                            <tr>
+                                <td><strong><?php echo htmlspecialchars($ord['order_code']); ?></strong></td>
+                                <td>
+                                    <div class="customer-name"><?php echo htmlspecialchars($ord['receiver_name']); ?></div>
+                                    <div class="customer-phone"><?php echo htmlspecialchars($ord['phone']); ?></div>
+                                </td>
+                                <td><?php echo htmlspecialchars($ord['first_product_name']); ?> <?php echo ($ord['total_qty'] > 1) ? '... và sản phẩm khác' : ''; ?></td>
+                                <td><?php echo intval($ord['total_qty']); ?></td>
+                                <td><strong><?php echo number_format($ord['total_amount'], 0, ',', '.'); ?> đ</strong></td>
+                                <td>
+                                    <?php
+                                    $current_status = $ord['order_status'];
+                                    // Kiểm tra nếu đơn hàng đã kết thúc (Hoàn thành hoặc Đã hủy)
+                                    $is_finished = ($current_status === 'Hoàn thành' || $current_status === 'Đã hủy');
+                                    ?>
+                                    <select class="product-input status-select" data-id="<?php echo $ord['id']; ?>" <?php echo $is_finished ? 'disabled style="background-color: #f1f5f9; cursor: not-allowed;"' : ''; ?>>
+                                        <?php
+                                        $statuses = [
+                                            'Chờ xác nhận' => 1,
+                                            'Đã xác nhận' => 2,
+                                            'Đang đóng gói' => 3,
+                                            'Đang giao hàng' => 4,
+                                            'Hoàn thành' => 5,
+                                            'Đã hủy' => 6
+                                        ];
+                                        $current_stt = isset($statuses[$current_status]) ? $statuses[$current_status] : 1;
+                                        foreach ($statuses as $st => $stt) {
+                                            $selected = ($current_status === $st) ? 'selected' : '';
+                                            $disabled = '';
+
+                                            // 1. Nếu đã 'Hoàn thành' thì khóa không cho chọn 'Đã hủy'
+                                            if ($current_status === 'Hoàn thành' && $st === 'Đã hủy') {
+                                                $disabled = 'disabled style="color: #cbd5e1;"';
+                                            }
+                                            // 2. Nếu đã 'Đã hủy' thì khóa tất cả các trạng thái khác
+                                            elseif ($current_status === 'Đã hủy' && $st !== 'Đã hủy') {
+                                                $disabled = 'disabled style="color: #cbd5e1;"';
+                                            }
+                                            // 3. Khóa các bước ngược lại về quá khứ
+                                            elseif ($stt < $current_stt) {
+                                                $disabled = 'disabled style="color: #cbd5e1;"';
+                                            }
+
+                                            echo "<option value=\"$st\" $selected $disabled>$st</option>";
+                                        }
+                                        ?>
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="#" class="btn-action btn-action-view" data-id="<?php echo $ord['id']; ?>" title="Xem chi tiết">
+                                            <i class="fa-regular fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: #64748b; padding: 20px;">Chưa có đơn hàng nào trong hệ thống.</td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        //Xử lý thông báo thay đổi trạng thái đơn hàng 
+        document.querySelectorAll(".status-select").forEach(function(select) {
+            select.addEventListener("change", function() {
+                const orderId = this.getAttribute("data-id");
+                const newStatus = this.value;
+                fetch(window.location.href, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `action=update_status&order_id=${orderId}&status=${encodeURIComponent(newStatus)}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: data.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        } else {
+                            Swal.fire("Lỗi!", data.message, "error");
+                        }
+                    });
+            });
+        });
+
+        // Xử lý xem chi tiết đơn hàng 
+        document.querySelectorAll(".btn-action-view").forEach((button) => {
+            button.addEventListener("click", function(e) {
+                e.preventDefault();
+                const orderId = this.getAttribute("data-id");
+                fetch(`?action=get_order_detail&id=${orderId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const ord = data.order;
+                            const items = data.items;
+
+                            let itemsHtml = '';
+                            items.forEach(item => {
+                                let subtotal = item.unit_price * item.quantity;
+                                itemsHtml += `
+                                <tr>
+                                    <td style="padding: 6px;">${item.product_name} ${item.color ? '('+item.color+')' : ''}</td>
+                                    <td style="padding: 6px; text-align: center;">${item.quantity}</td>
+                                    <td style="padding: 6px; text-align: right;">${Number(subtotal).toLocaleString('vi-VN')} đ</td>
+                                </tr>
+                            `;
+                            });
+
+                            Swal.fire({
+                                title: `<strong>Chi Tiết Đơn Hàng: ${ord.order_code}</strong>`,
+                                html: `
+                                <div style="text-align: left; font-size: 14px; line-height: 1.6;">
+                                    <p><strong>Trạng thái đơn hàng:</strong> <span style="color: #e67e22; font-weight: 500;">${ord.order_status}</span></p>
+                                    <p><strong>Thanh toán:</strong> ${ord.payment_method} - <span style="color: #27ae60; font-weight: 500;">${ord.payment_status}</span></p>
+                                    ${ord.reference_code ? `<p><strong>Mã giao dịch (TXN):</strong> <span style="font-family: monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">${ord.reference_code}</span></p>` : ''}
+                                    
+                                    <p style="margin-bottom: 5px; margin-top: 10px;"><strong>Khách hàng:</strong></p>
+                                    <div style="padding-left: 10px; background: #f8fafc; padding: 8px; border-radius: 6px;">
+                                        - ${ord.receiver_name}<br>
+                                        - SĐT: ${ord.phone}<br>
+                                        - Email: ${ord.email}<br>
+                                        - Địa chỉ: ${ord.address}
+                                        ${ord.note ? '<br>- Ghi chú: ' + ord.note : ''}
+                                    </div>
+                                    
+                                    <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
+                                    
+                                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                                        <thead>
+                                            <tr style="border-bottom: 1px solid #ddd;">
+                                                <th style="padding: 6px;">Sản phẩm</th>
+                                                <th style="padding: 6px; text-align: center;">SL</th>
+                                                <th style="padding: 6px; text-align: right;">Thành tiền</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${itemsHtml}
+                                        </tbody>
+                                    </table>
+                                    
+                                    <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
+                                    
+                                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 15px;">
+                                        <span>Phí vận chuyển:</span>
+                                        <span>${Number(ord.shipping_fee).toLocaleString('vi-VN')} đ</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 16px; margin-top: 5px;">
+                                        <span>Tổng thanh toán:</span>
+                                        <span style="color: #e74c3c;">${Number(ord.total_amount).toLocaleString('vi-VN')} đ</span>
+                                    </div>
+                                </div>
+                            `,
+                                confirmButtonText: "Đóng",
+                                confirmButtonColor: "#3085d6",
+                                width: "580px",
+                            });
+                        } else {
+                            Swal.fire("Lỗi!", data.message, "error");
+                        }
+                    });
+            });
+        });
+    });
+</script>
 
 <?php
 include("includes/footer.php");

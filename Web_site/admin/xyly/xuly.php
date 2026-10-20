@@ -41,5 +41,11 @@ class xuly extends csdltmdt
             return 0;
         }
     }
+    // Phương thức băm mật khẩu
+    public function bammatkhau($pass)
+    {
+        $salt = '1@Fd';
+        return md5($pass . $salt);
+    }
 }
 

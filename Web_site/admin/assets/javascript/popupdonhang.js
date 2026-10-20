@@ -1,58 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // ====CHI TIẾT ĐƠN HÀNG====
-  const viewButtons = document.querySelectorAll(".btn-action-view");
-  viewButtons.forEach((button) => {
-    button.addEventListener("click", function (e) {
-      e.preventDefault();
-      Swal.fire({
-        title: "<strong>Chi Tiết Đơn Hàng</strong>",
-        html: `
-            <div style="text-align: left; font-size: 14px; line-height: 1.6;">
-                <p><strong>Mã đơn hàng:</strong> 2314</p>
-                <p><strong>Trạng thái thanh toán:</strong> <span style="color: #27ae60; font-weight: 500;">Đã thanh toán</span></p>
-                <p><strong>Phương thức thanh toán:</strong> Chuyển khoản ngân hàng (QR Code)</p>
-                <p><strong>Mã giao dịch (TXN):</strong> <span style="font-family: monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">VCB-987654321</span></p>
-                <p style="margin-bottom: 5px; margin-top: 10px;"><strong>Khách hàng:</strong></p>
-                <div style="padding-left: 10px;">
-                    - Nguyễn Văn An<br>
-                    - SĐT: 0898645674<br>
-                    - Địa chỉ: TPHCM
-                </div>
-                <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid #ddd;">
-                            <th style="padding: 6px;">Sản phẩm</th>
-                            <th style="padding: 6px; text-align: center;">SL</th>
-                            <th style="padding: 6px; text-align: right;">Thành tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style="padding: 6px;">iPhone 18</td>
-                            <td style="padding: 6px; text-align: center;">1</td>
-                            <td style="padding: 6px; text-align: right;">25,000,000 đ</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 6px;">Samsung Galaxy S26 Ultra</td>
-                            <td style="padding: 6px; text-align: center;">1</td>
-                            <td style="padding: 6px; text-align: right;">28,000,000 đ</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
-                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 15px;">
-                    <span>Tổng tiền:</span>
-                    <span style="color: #e74c3c;">53,000,000 đ</span>
-                </div>
-            </div>
-        `,
-        confirmButtonText: "Đóng",
-        confirmButtonColor: "#3085d6",
-        width: "520px",
-      });
-    });
-  });
+
   //Chi tiết thanh toán
   document.addEventListener("click", function (e) {
     const viewBtn = e.target.closest(".action-view");
