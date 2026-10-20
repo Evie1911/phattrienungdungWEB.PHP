@@ -1,14 +1,11 @@
 <?php
 require_once '../config.php';
-// Cấu hình tiêu đề động cho trang
+include("xyly/xuly.php");
+
 $pageTitle = "Quản lý bài viết";
+$p = new xuly();
 
-// Các thành phần giao diện
-include("includes/header.php");
-include("includes/sidebar.php");
-include("includes/navbar.php");
-
-// Cắt chuỗi giới hạn đúng $limit từ (mặc định là 5 chữ)
+// Hàm cắt chuỗi giới hạn số từ
 function limitWords($string, $limit = 5)
 {
     $words = explode(" ", $string);
@@ -17,10 +14,57 @@ function limitWords($string, $limit = 5)
     }
     return $string;
 }
+
+// Xử lý xóa bài viết
+if (isset($_REQUEST['nut']) && $_REQUEST['nut'] === 'Xóa bài viết') {
+    $myid = isset($_REQUEST['txtid']) ? intval($_REQUEST['txtid']) : 0;
+    if ($myid > 0) {
+        if ($p->themxoasua("DELETE FROM articles WHERE id='$myid' LIMIT 1")) {
+            header("Location:baiviet.php?msg=deleted");
+            exit();
+        }
+    }
+}
+
+// Nhận dữ liệu tìm kiếm và lọc từ form GET
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$category_filter = isset($_GET['category_id']) ? trim($_GET['category_id']) : '';
+$status_filter   = isset($_GET['status']) ? trim($_GET['status']) : '';
+
+// Xây dựng câu lệnh SQL truy vấn bài viết kết hợp bảng news_categories
+$sql = "SELECT a.*, nc.name as category_name 
+        FROM articles a 
+        LEFT JOIN news_categories nc ON a.category_id = nc.id 
+        WHERE 1=1";
+
+if ($search !== '') {
+    $search_esc = addslashes($search);
+    $sql .= " AND a.title LIKE '%$search_esc%'";
+}
+
+if ($category_filter !== '') {
+    $cat_esc = intval($category_filter);
+    $sql .= " AND a.category_id = '$cat_esc'";
+}
+
+if ($status_filter !== '') {
+    $status_esc = addslashes($status_filter);
+    $sql .= " AND a.status = '$status_esc'";
+}
+
+$sql .= " ORDER BY a.id DESC";
+$articles = $p->xuatdulieu($sql);
+
+// Lấy danh sách danh mục bài viết cho thẻ select lọc
+$list_categories = $p->xuatdulieu("SELECT * FROM news_categories");
+
+include("includes/header.php");
+include("includes/sidebar.php");
+include("includes/navbar.php");
 ?>
 <main class="main-content">
     <div class="content-card">
-        <!-- Tiêu đề trang & Nút hành động -->
+
         <div class="page-header">
             <div class="page-title">
                 <h1>Quản Lý Bài Viết</h1>
@@ -31,33 +75,42 @@ function limitWords($string, $limit = 5)
             </a>
         </div>
 
-        <!-- Thanh tìm kiếm và bộ lọc -->
-        <div class="filter-section">
-            <div class="search-box">
-                <input type="text" placeholder="Tìm theo tiêu đề bài viết, mã ID...">
+        <form method="GET" action="" class="filter-section" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div class="search-box" style="flex: 1; min-width: 250px;">
+                <input type="text" name="search" placeholder="Tìm theo tiêu đề bài viết, mã ID..." value="<?php echo htmlspecialchars($search); ?>" style="width: 100%; padding: 10px 14px;" class="product-input">
             </div>
-            <select class="filter-select">
+
+            <select name="category_id" class="filter-select product-input" style="width: 200px; padding: 10px;">
                 <option value="">-- Danh mục bài viết --</option>
-                <option value="news">Tin công nghệ</option>
-                <option value="review">Đánh giá bài viết</option>
-                <option value="tutorial">Hướng dẫn - Thủ thuật</option>
-                <option value="promotion">Khuyến mãi - Sự kiện</option>
+                <?php if (!empty($list_categories)): ?>
+                    <?php foreach ($list_categories as $cat): ?>
+                        <option value="<?php echo $cat['id']; ?>" <?php echo ($category_filter == $cat['id']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($cat['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </select>
-            <select class="filter-select">
+
+            <select name="status" class="filter-select product-input" style="width: 180px; padding: 10px;">
                 <option value="">-- Trạng thái --</option>
-                <option value="published">Đã xuất bản</option>
-                <option value="draft">Bản nháp</option>
-                <option value="pending">Chờ duyệt</option>
+                <option value="Xuất bản" <?php echo ($status_filter === 'Xuất bản') ? 'selected' : ''; ?>>Đã xuất bản</option>
+                <option value="Bản nháp" <?php echo ($status_filter === 'Bản nháp') ? 'selected' : ''; ?>>Bản nháp</option>
+                <option value="Chờ duyệt" <?php echo ($status_filter === 'Chờ duyệt') ? 'selected' : ''; ?>>Chờ duyệt</option>
             </select>
-            <button class="btn-filter">Lọc</button>
-        </div>
+
+            <button type="submit" class="btn-filter" style="padding: 10px 20px; cursor: pointer;">Lọc</button>
+
+            <?php if ($search !== '' || $category_filter !== '' || $status_filter !== ''): ?>
+                <a href="baiviet.php" class="btn-filter" style="text-decoration:none;">Làm mới</a>
+            <?php endif; ?>
+        </form>
 
         <!-- Bảng danh sách bài viết -->
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>Mã bài viết</th>
+                        <th>STT</th>
                         <th>Ảnh đại diện</th>
                         <th>Tiêu đề bài viết</th>
                         <th>Tác giả</th>
@@ -68,130 +121,111 @@ function limitWords($string, $limit = 5)
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><strong>BV-101</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=100&auto=format&fit=crop&q=80" alt="Thumbnail" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;" title="Đánh giá chi tiết iPhone 15 Pro Max: Đỉnh cao công nghệ Apple"><?php echo limitWords("Đánh giá chi tiết iPhone 15 Pro Max: Đỉnh cao công nghệ Apple", 5); ?></span></td>
-                        <td>Nguyễn Văn An</td>
-                        <td>1,245</td>
-                        <td><span class="badge-category">Đánh giá</span></td>
-                        <td><span class="badge-status status-green">Đã xuất bản</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
-                                <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
-                                    <i class="fa-regular fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>BV-102</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=100&auto=format&fit=crop&q=80" alt="Thumbnail" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;" title="Top 5 mẫu điện thoại chơi game tốt nhất năm 2026"><?php echo limitWords("Top 5 mẫu điện thoại chơi game tốt nhất năm 2026", 5); ?></span></td>
-                        <td>Trần Thị Bình</td>
-                        <td>856</td>
-                        <td><span class="badge-category">Tin công nghệ</span></td>
-                        <td><span class="badge-status status-green">Đã xuất bản</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
-                                <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
-                                    <i class="fa-regular fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>BV-103</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=100&auto=format&fit=crop&q=80" alt="Thumbnail" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;" title="Hướng dẫn cách tối ưu thời lượng pin cho Samsung Galaxy S24"><?php echo limitWords("Hướng dẫn cách tối ưu thời lượng pin cho Samsung Galaxy S24", 5); ?></span></td>
-                        <td>Lê Hoàng Nam</td>
-                        <td>432</td>
-                        <td><span class="badge-category">Thủ thuật</span></td>
-                        <td><span class="badge-status status-yellow">Bản nháp</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
-                                <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
-                                    <i class="fa-regular fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>BV-104</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=100&auto=format&fit=crop&q=80" alt="Thumbnail" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;" title="Sự kiện Tech Day 2026: Trải nghiệm hệ sinh thái thông minh mới"><?php echo limitWords("Sự kiện Tech Day 2026: Trải nghiệm hệ sinh thái thông minh mới", 5); ?></span></td>
-                        <td>Phạm Thị Mai</td>
-                        <td>0</td>
-                        <td><span class="badge-category">Sự kiện</span></td>
-                        <td><span class="badge-status status-red">Chờ duyệt</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
-                                <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
-                                    <i class="fa-regular fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>BV-105</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&auto=format&fit=crop&q=80" alt="Thumbnail" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;" title="Đánh giá tai nghe AirPods Pro 2: Chống ồn chủ động xuất sắc"><?php echo limitWords("Đánh giá tai nghe AirPods Pro 2: Chống ồn chủ động xuất sắc", 5); ?></span></td>
-                        <td>Hoàng Văn Hùng</td>
-                        <td>2,100</td>
-                        <td><span class="badge-category">Đánh giá</span></td>
-                        <td><span class="badge-status status-green">Đã xuất bản</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
-                                <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
-                                    <i class="fa-regular fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>BV-106</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=100&auto=format&fit=crop&q=80" alt="Thumbnail" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;" title="Tìm hiểu về lập trình web hiện đại với React và PHP"><?php echo limitWords("Tìm hiểu về lập trình web hiện đại với React và PHP", 5); ?></span></td>
-                        <td>Vũ Minh Tuấn</td>
-                        <td>610</td>
-                        <td><span class="badge-category">Thủ thuật</span></td>
-                        <td><span class="badge-status status-green">Đã xuất bản</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
-                                <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
-                                    <i class="fa-regular fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>BV-107</strong></td>
-                        <td><img src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=100&auto=format&fit=crop&q=80" alt="Thumbnail" class="product-img"></td>
-                        <td><span style="font-weight: 600; color: #0f172a;" title="Xu hướng công nghệ trí tuệ nhân tạo AI trong năm tới"><?php echo limitWords("Xu hướng công nghệ trí tuệ nhân tạo AI trong năm tới", 5); ?></span></td>
-                        <td>Nguyễn Thị Hồng</td>
-                        <td>95</td>
-                        <td><span class="badge-category">Tin công nghệ</span></td>
-                        <td><span class="badge-status status-yellow">Bản nháp</span></td>
-                        <td>
-                            <div class="action-buttons">
-                                <a href="<?php echo BASE_URL; ?>/capnhatbaiviet.php" class="btn-action btn-edit" title="Chỉnh sửa"><i class="fa-regular fa-pen-to-square"></i></a>
-                                <button class="btn-action btn-delete nutxoa" title="Xóa" data-type="bài viết">
-                                    <i class="fa-regular fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    <?php
+                    if (!empty($articles)) {
+                        $stt = 1;
+                        foreach ($articles as $art) {
+                            $thumbSrc = '../uploads/baiviet/' . $art['thumbnail'];
+                            // Gán màu nhãn trạng thái tương ứng
+                            $stt_class = 'status-yellow';
+                            if ($art['status'] === 'Xuất bản') $stt_class = 'status-green';
+                            elseif ($art['status'] === 'Chờ duyệt') $stt_class = 'status-red';
+
+                            echo '<tr>
+                                <td><strong>' . $stt++ . '</strong></td>
+                                <td><img src="' . htmlspecialchars($thumbSrc) . '" alt="Thumbnail" class="product-img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;"></td>
+                                <td><span style="font-weight: 600; color: #0f172a;" title="' . htmlspecialchars($art['title']) . '">' . limitWords(htmlspecialchars($art['title']), 5) . '</span></td>
+                                <td>' . htmlspecialchars($art['author']) . '</td>
+                                <td>' . number_format($art['view_count']) . '</td>
+                                <td><span class="badge-category">' . htmlspecialchars($art['category_name']) . '</span></td>
+                                <td><span class="badge-status ' . $stt_class . '">' . htmlspecialchars($art['status']) . '</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="' . BASE_URL . '/capnhatbaiviet.php?id=' . $art['id'] . '" class="btn-action btn-edit" title="Chỉnh sửa">
+                                            <i class="fa-regular fa-pen-to-square"></i>
+                                        </a>
+                                        <button type="button" class="btn-action btn-delete nutxoa" title="Xóa" data-id="' . $art['id'] . '" data-name="' . htmlspecialchars($art['title']) . '">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>';
+                        }
+                    } else {
+                        echo '<tr><td colspan="9" style="text-align: center; padding: 20px; color: #64748b;">Chưa có bài viết nào trong hệ thống.</td></tr>';
+                    }
+                    ?>
                 </tbody>
             </table>
         </div>
     </div>
 </main>
+
+<!-- Thư viện SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Script thông báo thành công khi xóa -->
+<?php if (isset($_GET['msg']) && $_GET['msg'] === 'deleted'): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: 'Xóa bài viết thành công!',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            });
+        });
+    </script>
+<?php endif; ?>
+
+<!-- Script bắt sự kiện click nút xóa bằng SweetAlert2 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.nutxoa').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const id = this.dataset.id;
+                const name = this.dataset.name || 'bài viết này';
+
+                Swal.fire({
+                    title: 'Xác nhận xóa?',
+                    text: `Bạn có chắc chắn muốn xóa "${name}" không?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Có, xóa ngay!',
+                    cancelButtonText: 'Hủy bỏ'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '';
+
+                        const inputId = document.createElement('input');
+                        inputId.type = 'hidden';
+                        inputId.name = 'txtid';
+                        inputId.value = id;
+                        form.appendChild(inputId);
+
+                        const inputNut = document.createElement('input');
+                        inputNut.type = 'hidden';
+                        inputNut.name = 'nut';
+                        inputNut.value = 'Xóa bài viết';
+                        form.appendChild(inputNut);
+
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+
 <?php
 include("includes/footer.php");
 ?>

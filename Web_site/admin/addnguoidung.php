@@ -21,58 +21,72 @@ if (isset($_POST['nut'])) {
             // Kiểm tra các thông tin bắt buộc
             if ($user_code !== '' && $full_name !== '' && $email !== '' && $raw_pass !== '' && $role !== '') {
 
-                // Mã hóa mật khẩu bằng password_hash()
-                $hashed_password = password_hash($raw_pass, PASSWORD_DEFAULT);
-
-                // Xử lý upload ảnh đại diện sử dụng phương thức uploadfile
-                $avatarName = NULL;
-                if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
-                    $tmp_name      = $_FILES['avatar']['tmp_name'];
-                    $original_name = $_FILES['avatar']['name'];
-                    $fileExtension = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
-
-                    $avatarName    = md5(time() . $original_name) . '.' . $fileExtension;
-                    $folder        = '../uploads/avatar';
-
-                    if (!is_dir($folder)) {
-                        mkdir($folder, 0755, true);
-                    }
-
-                    if ($p->uploadfile($avatarName, $tmp_name, $folder) != 1) {
-                        $avatarName = NULL;
-                    }
-                }
-
-                $avatar_val = ($avatarName !== NULL) ? "'$avatarName'" : "NULL";
-                $phone_val  = (!empty($phone)) ? "'$phone'" : "NULL";
-
-                $sql = "INSERT INTO users (user_code, full_name, email, password, phone, avatar, role, status, created_at) 
-                        VALUES ('$user_code', '$full_name', '$email', '$hashed_password', $phone_val, $avatar_val, '$role', '$status', NOW())";
-
-                if ($p->themxoasua($sql)) {
+                // Kiểm tra xem email đã tồn tại chưa
+                $check_exist = $p->xuatdulieu("SELECT id FROM users WHERE email = '$email' LIMIT 1");
+                if (!empty($check_exist)) {
                     echo "<script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Thành công!',
-                                text: 'Thêm tài khoản người dùng thành công!',
-                                showConfirmButton: false,
-                                timer: 1500
-                            }).then(() => {
-                                window.location.href = 'qlnguoidung.php';
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Thất bại!',
+                                    text: 'Email hoặc mã tài khoản đã tồn tại trong hệ thống.'
+                                });
                             });
-                        });
-                    </script>";
+                        </script>";
                 } else {
-                    echo "<script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Thất bại!',
-                                text: 'Email hoặc mã tài khoản đã tồn tại trong hệ thống.'
+                    // Mã hóa mật khẩu bằng password_hash()
+                    $hashed_password = password_hash($raw_pass, PASSWORD_DEFAULT);
+
+                    // Xử lý upload ảnh đại diện sử dụng phương thức uploadfile
+                    $avatarName = NULL;
+                    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+                        $tmp_name      = $_FILES['avatar']['tmp_name'];
+                        $original_name = $_FILES['avatar']['name'];
+                        $fileExtension = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
+
+                        $avatarName    = md5(time() . $original_name) . '.' . $fileExtension;
+                        $folder        = '../uploads/avatar';
+
+                        if (!is_dir($folder)) {
+                            mkdir($folder, 0755, true);
+                        }
+
+                        if ($p->uploadfile($avatarName, $tmp_name, $folder) != 1) {
+                            $avatarName = NULL;
+                        }
+                    }
+
+                    $avatar_val = ($avatarName !== NULL) ? "'$avatarName'" : "NULL";
+                    $phone_val  = (!empty($phone)) ? "'$phone'" : "NULL";
+
+                    $sql = "INSERT INTO users (user_code, full_name, email, password, phone, avatar, role, status, created_at) 
+                            VALUES ('$user_code', '$full_name', '$email', '$hashed_password', $phone_val, $avatar_val, '$role', '$status', NOW())";
+
+                    if ($p->themxoasua($sql)) {
+                        echo "<script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Thành công!',
+                                    text: 'Thêm tài khoản người dùng thành công!',
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                }).then(() => {
+                                    window.location.href = 'qlnguoidung.php';
+                                });
                             });
-                        });
-                    </script>";
+                        </script>";
+                    } else {
+                        echo "<script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi hệ thống!',
+                                    text: 'Không thể thêm tài khoản vào cơ sở dữ liệu.'
+                                });
+                            });
+                        </script>";
+                    }
                 }
             } else {
                 echo "<script>

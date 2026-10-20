@@ -48,7 +48,6 @@ $sql .= " ORDER BY id DESC";
 
 $danhmuc = $p->xuatdulieu($sql);
 
-// Các thành phần giao diện
 include("includes/header.php");
 include("includes/sidebar.php");
 include("includes/navbar.php");
@@ -76,7 +75,6 @@ include("includes/navbar.php");
             <?php endif; ?>
         </form>
 
-        <!-- Bảng danh sách danh mục -->
         <div class="table-container">
             <table>
                 <thead>
@@ -99,27 +97,26 @@ include("includes/navbar.php");
                             $countRes = $p->xuatdulieu("SELECT COUNT(*) as total FROM products WHERE category_id = '$catId'");
                             $productCount = !empty($countRes) ? $countRes[0]['total'] : 0;
 
-                            // Xử lý đường dẫn ảnh danh mục chính xác
-                            $imgName = !empty($row['image']) ? $row['image'] : '';
-                            $imageSrc = (!empty($imgName)) ? '../uploads/anhdanhmuc/' . $imgName : 'https://image.dienthoaivui.com.vn/x,webp,q90/https://media-asset.dienthoaivui.com.vn/uploads/dashboard/editor_upload/nen-trang-tron-48.jpg';
+                            // Gán trực tiếp đường dẫn ảnh theo cấu trúc thư mục
+                            $imageSrc = '../uploads/anhdanhmuc/' . $row['image'];
 
                             echo '<tr>
-                                <td><strong>' . $stt++ . '</strong></td>
-                                <td><img src="' . $imageSrc . '" alt="Category Image" class="product-img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
-                                <td><span style="font-weight: 600; color: #0f172a;">' . htmlspecialchars($row['name']) . '</span></td>
-                                <td>' . htmlspecialchars($row['description']) . '</td>
-                                <td>' . $productCount . '</td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <a href="' . BASE_URL . '/capnhatdm.php?id=' . $row['id'] . '" class="btn-action btn-edit" title="Chỉnh sửa">
-                                            <i class="fa-regular fa-pen-to-square"></i>
-                                        </a>
-                                        <button type="button" class="btn-action btn-delete nutxoa" title="Xóa" data-id="' . $row['id'] . '" data-name="' . htmlspecialchars($row['name']) . '">
-                                            <i class="fa-regular fa-trash-can"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>';
+                                    <td><strong>' . $stt++ . '</strong></td>
+                                    <td><img src="' . htmlspecialchars($imageSrc) . '" alt="Category Image" class="product-img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
+                                    <td><span style="font-weight: 600; color: #0f172a;">' . htmlspecialchars($row['name']) . '</span></td>
+                                    <td>' . htmlspecialchars($row['description']) . '</td>
+                                    <td>' . $productCount . '</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="' . BASE_URL . '/capnhatdm.php?id=' . $row['id'] . '" class="btn-action btn-edit" title="Chỉnh sửa">
+                                                <i class="fa-regular fa-pen-to-square"></i>
+                                            </a>
+                                            <button type="button" class="btn-action btn-delete nutxoa" title="Xóa" data-id="' . $row['id'] . '" data-name="' . htmlspecialchars($row['name']) . '">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>';
                         }
                     } else {
                         echo '<tr><td colspan="6" style="text-align: center; padding: 20px;">Chưa có danh mục nào.</td></tr>';
@@ -131,8 +128,7 @@ include("includes/navbar.php");
     </div>
 </main>
 
-<!-- Thư viện SweetAlert2 CDN -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 <!-- Script thông báo thành công khi xóa -->
 <?php if (isset($_GET['msg']) && $_GET['msg'] === 'deleted'): ?>

@@ -5,7 +5,7 @@ include("xyly/xuly.php");
 $pageTitle = "Quản lý sản phẩm";
 $p = new xuly();
 
-// 1.xử lý xóa sản phẩm
+// Xử lý xóa sản phẩm
 if (isset($_REQUEST['nut']) && $_REQUEST['nut'] === 'Xóa sản phẩm') {
     $myid = isset($_REQUEST['txtid']) ? intval($_REQUEST['txtid']) : 0;
     if ($myid > 0) {
@@ -41,7 +41,6 @@ $sql .= " ORDER BY id DESC";
 $sanpham = $p->xuatdulieu($sql);
 $list_categories = $p->xuatdulieu("SELECT id, name FROM categories WHERE status = 1");
 
-//Gọi các thành phần giao diện
 include("includes/header.php");
 include("includes/sidebar.php");
 include("includes/navbar.php");
@@ -49,7 +48,7 @@ include("includes/navbar.php");
 
 <main class="main-content">
     <div class="content-card">
-        <!-- Tiêu đề trang & Nút hành động -->
+
         <div class="page-header">
             <div class="page-title">
                 <h1>Quản Lý Sản Phẩm</h1>
@@ -60,7 +59,6 @@ include("includes/navbar.php");
             </a>
         </div>
 
-        <!-- Thanh tìm kiếm và bộ lọc -->
         <form method="GET" action="" class="filter-section">
             <div class="search-box">
                 <input type="text" name="search" placeholder="Tìm theo tên sản phẩm, mã SKU..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
@@ -88,7 +86,6 @@ include("includes/navbar.php");
             <?php endif; ?>
         </form>
 
-        <!-- Bảng danh sách sản phẩm -->
         <div class="table-container">
             <table>
                 <thead>
@@ -156,7 +153,6 @@ include("includes/navbar.php");
 </main>
 
 
-<!-- Script hiển thị thông báo thành công khi xóa xong -->
 <?php if (isset($_GET['msg']) && $_GET['msg'] === 'deleted'): ?>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

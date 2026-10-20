@@ -24,6 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && isset($_
             $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $val), '-'));
             $sql = "INSERT INTO categories (category_code, name, slug, status) VALUES ('$code', '$val', '$slug', 1)";
             break;
+        case 'news_category': // Thêm danh mục bài viết mới
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $val), '-'));
+            $sql = "INSERT INTO news_categories (name, slug) VALUES ('$val', '$slug')";
+            break;
         case 'brand': // Thêm thương hiệu / tình trạng
             $sql = "INSERT INTO brands (name) VALUES ('$val')";
             break;

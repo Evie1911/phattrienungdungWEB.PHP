@@ -53,11 +53,13 @@ if (isset($_POST['nut'])) {
                 $clean_sale     = !empty($sale_price) ? floatval(str_replace(['.', ','], '', $sale_price)) : 0;
 
                 // Câu lệnh INSERT
-                $sql = "INSERT INTO products (sku, category_id, brand_id, supplier_id, name, description, price, sale_price, stock, condition_text, image, created_at, updated_at) 
-                        VALUES ('$sku', '$category_id', '$brand_id', $supplier_val, '$name', '$description', '$clean_price', " . ($clean_sale ? "'$clean_sale'" : "NULL") . ", 
+                $sql = "INSERT INTO products (sku, category_id, brand_id, supplier_id, name, description, 
+                         price, sale_price, stock, condition_text, image, created_at, updated_at) 
+                        VALUES ('$sku', '$category_id', '$brand_id', $supplier_val, '$name', '$description', '$clean_price', 
+                        " . ($clean_sale ? "'$clean_sale'" : "NULL") . ", 
                         '$clean_stock', '$condition_text',$image_val, NOW(), NOW())";
 
-                // Thông báo kết quả bằng SweetAlert2
+                // Thông báo kết quả bằng SweetAlert
                 if ($db->themxoasua($sql)) {
                     echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {

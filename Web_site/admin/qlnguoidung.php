@@ -2,9 +2,10 @@
 require_once '../config.php';
 include("xyly/xuly.php");
 
+$pageTitle = "Quản lý người dùng";
 $p = new xuly();
 
-//Xử lý cập nhật quyền (role) hoặc trạng thái (status) qua AJAX
+// Xử lý cập nhật quyền (role) hoặc trạng thái (status) 
 if (isset($_POST['action'])) {
     $user_id = intval($_POST['user_id']);
 
@@ -35,12 +36,12 @@ if (isset($_POST['action'])) {
     }
 }
 
-//Nhận dữ liệu tìm kiếm và lọc từ form GET
+// Nhận dữ liệu tìm kiếm và lọc từ form GET
 $search_keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
 $role_filter    = isset($_GET['role']) ? trim($_GET['role']) : '';
 $status_filter  = isset($_GET['status']) ? trim($_GET['status']) : '';
 
-//Xây dựng câu truy vấn danh sách người dùng kèm đếm số lượng đơn hàng
+// Xây dựng câu truy vấn danh sách người dùng kèm đếm số lượng đơn hàng
 $sql_users = "SELECT u.*, 
               (SELECT COUNT(*) FROM orders WHERE user_id = u.id) as total_orders 
               FROM users u WHERE 1=1";
@@ -63,8 +64,6 @@ if ($status_filter !== '') {
 $sql_users .= " ORDER BY u.created_at DESC";
 $list_users = $p->xuatdulieu($sql_users);
 
-$pageTitle = "Quản lý người dùng";
-
 include("includes/header.php");
 include("includes/sidebar.php");
 include("includes/navbar.php");
@@ -84,7 +83,7 @@ include("includes/navbar.php");
 
         <form method="GET" action="" class="filter-section" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
             <div class="search-box" style="flex: 1; min-width: 250px;">
-                <input type="text" name="keyword" value="<?php echo htmlspecialchars($search_keyword); ?>" placeholder="Tìm kiếm theo mã, tên, email, SĐT..." style="width: 100%; padding: 10px 14px;" class="product-input">
+                <input type="text" name="keyword" value="<?php echo htmlspecialchars($search_keyword); ?>" placeholder="Tìm kiếm theo tên.." style="width: 100%; padding: 10px 14px;" class="product-input">
             </div>
 
             <select name="role" class="filter-select product-input" style="width: 180px; padding: 10px;">
@@ -101,7 +100,7 @@ include("includes/navbar.php");
 
             <button type="submit" class="btn-filter" style="padding: 10px 20px; cursor: pointer;">Lọc</button>
             <?php if ($search_keyword !== '' || $role_filter !== '' || $status_filter !== ''): ?>
-                <a href="qlnguoidung.php" style="text-decoration: none;">Làm mới</a>
+                <a href="qlnguoidung.php" class="btn-filter" style="text-decoration: none;">Làm mới</a>
             <?php endif; ?>
         </form>
 
@@ -109,7 +108,7 @@ include("includes/navbar.php");
             <table>
                 <thead>
                     <tr>
-                        <th>Mã tài khoản</th>
+                        <th>STT</th>
                         <th>Ảnh</th>
                         <th>Họ và tên</th>
                         <th>Email</th>
@@ -120,45 +119,49 @@ include("includes/navbar.php");
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (!empty($list_users)): ?>
-                        <?php foreach ($list_users as $usr): ?>
-                            <tr>
-                                <td><strong><?php echo htmlspecialchars($usr['user_code']); ?></strong></td>
-                                <td>
-                                    <?php if (!empty($usr['avatar'])): ?>
-                                        <img src="../uploads/avatar/<?php echo htmlspecialchars($usr['avatar']); ?>" alt="Avatar" class="product-img" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
-                                    <?php else: ?>
-                                        <img src="../uploads/avatar/null.jpg<?php echo htmlspecialchars($usr['avatar']); ?>" alt="Avatar" class="product-img" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
-                                    <?php endif; ?>
-                                </td>
-                                <td><span style="font-weight: 600; color: #0f172a;"><?php echo htmlspecialchars($usr['full_name']); ?></span></td>
-                                <td><?php echo htmlspecialchars($usr['email']); ?></td>
-                                <td><?php echo htmlspecialchars($usr['phone']); ?></td>
-                                <td style="text-align: center; font-weight: bold;"><?php echo intval($usr['total_orders']); ?></td>
-                                <td>
-                                    <select class="role-select product-input" data-id="<?php echo $usr['id']; ?>" style="padding: 6px;">
-                                        <option value="admin" <?php echo ($usr['role'] === 'admin') ? 'selected' : ''; ?>>Admin</option>
-                                        <option value="customer" <?php echo ($usr['role'] === 'customer') ? 'selected' : ''; ?>>Khách hàng</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <select class="role-select status-action-select product-input" data-id="<?php echo $usr['id']; ?>" style="padding: 6px;">
-                                        <option value="active" <?php echo ($usr['status'] === 'active') ? 'selected' : ''; ?>>Mở khóa (Hoạt động)</option>
-                                        <option value="locked" <?php echo ($usr['status'] === 'locked') ? 'selected' : ''; ?>>Khóa tài khoản</option>
-                                    </select>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="8" style="text-align: center; color: #64748b; padding: 20px;">Không tìm thấy tài khoản người dùng nào phù hợp.</td>
-                        </tr>
-                    <?php endif; ?>
+                    <?php
+                    if (!empty($list_users)) {
+                        $stt = 1;
+                        foreach ($list_users as $usr) {
+                            // Gán trực tiếp đường dẫn ảnh đại diện theo cấu trúc thư mục
+                            $avatarSrc = '../uploads/avatar/' . $usr['avatar'];
+                            $avatarDefault = '../uploads/avatar/null.jpg';
+                            $finalAvatar = (!empty($usr['avatar'])) ? $avatarSrc : $avatarDefault;
+
+                            $statusStyle = ($usr['status'] === 'locked') ? 'color: #dc2626; background: #fee2e2;' : 'color: #059669; background: #d1fae5;';
+
+                            echo '<tr>
+                                    <td><strong>' . $stt++ . '</strong></td>
+                                    <td><img src="' . htmlspecialchars($finalAvatar) . '" alt="Avatar" class="product-img" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;"></td>
+                                    <td><span style="font-weight: 600; color: #0f172a;">' . htmlspecialchars($usr['full_name']) . '</span></td>
+                                    <td>' . htmlspecialchars($usr['email']) . '</td>
+                                    <td>' . htmlspecialchars($usr['phone']) . '</td>
+                                    <td style="text-align: center; font-weight: bold;">' . intval($usr['total_orders']) . '</td>
+                                    <td>
+                                        <select class="role-select product-input" data-id="' . $usr['id'] . '" style="padding: 6px;">
+                                            <option value="admin" ' . (($usr['role'] === 'admin') ? 'selected' : '') . '>Admin</option>
+                                            <option value="customer" ' . (($usr['role'] === 'customer') ? 'selected' : '') . '>Khách hàng</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="role-select status-action-select product-input" data-id="' . $usr['id'] . '" style="padding: 6px; ' . $statusStyle . '">
+                                            <option value="active" ' . (($usr['status'] === 'active') ? 'selected' : '') . '>Mở khóa</option>
+                                            <option value="locked" ' . (($usr['status'] === 'locked') ? 'selected' : '') . '>Khóa tài khoản</option>
+                                        </select>
+                                    </td>
+                                </tr>';
+                        }
+                    } else {
+                        echo '<tr><td colspan="9" style="text-align: center; color: #64748b; padding: 20px;">Không tìm thấy tài khoản người dùng nào phù hợp.</td></tr>';
+                    }
+                    ?>
                 </tbody>
             </table>
         </div>
     </div>
 </main>
+
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -185,6 +188,8 @@ include("includes/navbar.php");
                                 title: data.message,
                                 showConfirmButton: false,
                                 timer: 1500
+                            }).then(() => {
+                                location.reload();
                             });
                         } else {
                             Swal.fire("Lỗi!", data.message, "error");
@@ -198,7 +203,6 @@ include("includes/navbar.php");
             select.addEventListener("change", function() {
                 const userId = this.getAttribute("data-id");
                 const newStatus = this.value;
-                const selectElem = this;
 
                 fetch(window.location.href, {
                         method: "POST",
@@ -217,7 +221,7 @@ include("includes/navbar.php");
                                 title: data.message,
                                 showConfirmButton: false,
                                 timer: 1500
-                            }).then.then(() => {
+                            }).then(() => {
                                 location.reload();
                             });
                         } else {

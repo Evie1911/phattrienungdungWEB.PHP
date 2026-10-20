@@ -114,7 +114,6 @@ if (isset($_REQUEST['id'])) {
 
 $pageTitle = "Cập nhật danh mục";
 
-// Nhúng các thành phần giao diện chung
 include("includes/header.php");
 include("includes/sidebar.php");
 include("includes/navbar.php");
@@ -123,7 +122,6 @@ include("includes/navbar.php");
 <main class="main-content" style="margin-top: 20px;">
     <div class="form-scroll-container" style="background-color: white; padding: 20px; border-radius: 12px;">
 
-        <!-- Tiêu đề và đường dẫn -->
         <div class="product-header-wrap">
             <div class="product-title-area">
                 <h1>Cập nhật danh mục</h1>
@@ -133,7 +131,6 @@ include("includes/navbar.php");
             </div>
         </div>
 
-        <!-- Form chính -->
         <form id="updateCategoryForm" action="" method="POST" enctype="multipart/form-data">
             <!-- ID ẩn dùng cho quá trình cập nhật -->
             <input type="hidden" name="txtid" value="<?php echo $layid; ?>">
