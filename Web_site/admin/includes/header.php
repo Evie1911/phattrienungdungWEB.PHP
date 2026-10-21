@@ -1,5 +1,16 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once '../config.php';
+$db = new xuly();
+$pageTitle = "Trang chủ - Thống kê";
+if (isset($_SESSION['id'], $_SESSION['user_code'], $_SESSION['email'], $_SESSION['role']) && $_SESSION['role'] === 'admin') {
+    $db->confirmlogin($_SESSION['id'], $_SESSION['user_code'], $_SESSION['email'], $_SESSION['role']);
+} else {
+    header('location:index.php');
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -41,10 +41,66 @@ class xuly extends csdltmdt
             return 0;
         }
     }
-    // Phương thức băm mật khẩu
-    public function bammatkhau($pass)
+    public function mylogin($email, $pass)
     {
-        $salt = '1@Fd';
-        return md5($pass . $salt);
+        $link = $this->connect();
+        $email = trim($email);
+        $stmt = $link->prepare(
+            "SELECT id, user_code, full_name, email, password, role, status FROM users WHERE email = ? LIMIT 1"
+        );
+        //gửi email lên csdl
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        //kt Sai email hoặc mật khẩu
+        if (!$row || !password_verify($pass, $row['password'])) {
+            $link->close();
+            return 0;
+        }
+        // Tài khoản bị khóa
+        if ($row['status'] !== 'active') {
+            $link->close();
+            return -2;
+        }
+        // Không phải admin
+        if ($row['role'] !== 'admin') {
+            $link->close();
+            return -1;
+        }
+        // Đăng nhập thành công
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        session_regenerate_id(true);
+
+        $_SESSION['id']        = $row['id'];
+        $_SESSION['user_code'] = $row['user_code'];
+        $_SESSION['full_name'] = $row['full_name'];
+        $_SESSION['email']     = $row['email'];
+        $_SESSION['role']      = $row['role'];
+        $_SESSION['status']    = $row['status'];
+
+        $link->close();
+        header('location: thongke.php');
+        exit();
+    }
+    public function confirmlogin($id, $user_code, $pass = null)
+    {
+        $link = $this->connect();
+
+        $stmt = $link->prepare(
+            "SELECT id FROM users WHERE id = ? AND (user_code = ? OR email = ?) AND status = 'active' AND role = 'admin' LIMIT 1"
+        );
+        $stmt->bind_param('iss', $id, $user_code, $user_code);
+        $stmt->execute();
+        $ok = $stmt->get_result()->num_rows === 1;
+        $stmt->close();
+        $link->close();
+
+        if (!$ok) {
+            header('location: login.php');
+            exit();
+        }
     }
 }
