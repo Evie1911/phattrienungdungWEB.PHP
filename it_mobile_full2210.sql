@@ -268,10 +268,10 @@ INSERT INTO suppliers (id, name, phone, email, address) VALUES
 
 -- Danh mục: cấp 1 (nhóm menu website) và cấp 2 (danh mục trong Admin)
 INSERT INTO categories (id, category_code, parent_id, name, slug, icon, image, description, sort_order) VALUES
-(1,  'NM-01', NULL, 'Điện thoại',    'dien-thoai',    'fa-mobile-screen',        NULL, 'Nhóm điện thoại thông minh', 1),
-(2,  'NM-02', NULL, 'Máy tính bảng', 'may-tinh-bang', 'fa-tablet-screen-button', NULL, 'Nhóm máy tính bảng',        2),
-(3,  'NM-03', NULL, 'Phụ kiện',      'phu-kien',      'fa-headphones',           NULL, 'Nhóm phụ kiện công nghệ',   3),
-(4,  'NM-04', NULL, 'Laptop',        'laptop',        'fa-laptop',               NULL, 'Nhóm máy tính xách tay',    4);INSERT INTO brands (id, name) VALUES
+(1,  'NM-01', NULL, 'Điện thoại',    'dien-thoai',    'fa-mobile-screen',        'dm4.jpg', 'Nhóm điện thoại thông minh', 1),
+(2,  'NM-02', NULL, 'Máy tính bảng', 'may-tinh-bang', 'fa-tablet-screen-button', 'dm3.jpg', 'Nhóm máy tính bảng',        2),
+(3,  'NM-03', NULL, 'Phụ kiện',      'phu-kien',      'fa-headphones',           'dm2.png', 'Nhóm phụ kiện công nghệ',   3),
+(4,  'NM-04', NULL, 'Laptop',        'laptop',        'fa-laptop',               'DM1.webp', 'Nhóm máy tính xách tay',    4);INSERT INTO brands (id, name) VALUES
 (1,'Apple'),(2,'Samsung'),(3,'Xiaomi'),(4,'OPPO'),(5,'Anker'),(6,'Baseus'),(7,'UAG'),(8,'Sony');
 
 -- Sản phẩm (price = giá bán niêm yết, sale_price = giá giảm)
@@ -415,8 +415,10 @@ INSERT INTO order_items (order_id, product_id, product_name, color, storage, uni
 (3, 2,  'Samsung Galaxy S24 Ultra 5G',             'Xám Titan',      '256GB', 27990000, 1),
 (4, 8,  'Tai nghe Apple AirPods Pro 2 USB-C',      'Trắng',          'Tiêu chuẩn', 5490000, 2),
 (5, 5,  'iPad Pro 13 inch M4 Wi-Fi 256GB',         'Bạc (Silver)',   '256GB', 35990000, 1),
+(6, 8, 'Tai nghe Apple AirPod', 'Trắng',          'Tiêu chuẩn', 4490000, 1),
 (7, 7,  'Xiaomi Pad 6S Pro 12.4',                  'Xanh',           '256GB', 12990000, 1),
 (8, 4,  'OPPO Find X7 Ultra',                      'Nâu',            '256GB', 22990000, 1),
+(9, 1, 'iPhone 16 Pro Max 256GB', 'Đen', '512GB', 32990000, 1),
 (10,6,  'Samsung Galaxy Tab S9 Ultra',             'Xám',            '256GB', 24990000, 1);
 
 UPDATE order_items oi JOIN products p ON p.id = oi.product_id SET oi.cost_price = p.cost_price;
