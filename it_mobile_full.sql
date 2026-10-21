@@ -271,73 +271,23 @@ INSERT INTO categories (id, category_code, parent_id, name, slug, icon, image, d
 (1,  'NM-01', NULL, 'Điện thoại',    'dien-thoai',    'fa-mobile-screen',        NULL, 'Nhóm điện thoại thông minh', 1),
 (2,  'NM-02', NULL, 'Máy tính bảng', 'may-tinh-bang', 'fa-tablet-screen-button', NULL, 'Nhóm máy tính bảng',        2),
 (3,  'NM-03', NULL, 'Phụ kiện',      'phu-kien',      'fa-headphones',           NULL, 'Nhóm phụ kiện công nghệ',   3),
-(4,  'NM-04', NULL, 'Laptop',        'laptop',        'fa-laptop',               NULL, 'Nhóm máy tính xách tay',    4),
-(5,  'DM-01', 1, 'iPhone',      'iphone',      NULL, 'dm-iphone.jpg',   'Các dòng điện thoại iPhone chính hãng Apple', 1),
-(6,  'DM-02', 1, 'Samsung',     'samsung',     NULL, 'dm-samsung.jpg',  'Điện thoại thông minh Samsung Galaxy các dòng', 2),
-(7,  'DM-03', 1, 'Xiaomi',      'xiaomi',      NULL, 'dm-xiaomi.jpg',   'Điện thoại và thiết bị công nghệ Xiaomi', 3),
-(8,  'DM-04', 4, 'MacBook',     'macbook',     NULL, 'dm-macbook.jpg',  'Máy tính xách tay MacBook Air & Pro', 4),
-(9,  'DM-05', 2, 'iPad',        'ipad',        NULL, 'dm-ipad.jpg',     'Máy tính bảng Apple iPad các loại', 5),
-(10, 'DM-06', 3, 'Apple Watch', 'apple-watch', NULL, 'dm-watch.jpg',    'Đồng hồ thông minh Apple Watch các phiên bản', 6),
-(11, 'DM-07', 1, 'OPPO',        'oppo',        NULL, 'dm-oppo.jpg',     'Điện thoại OPPO Find và Reno', 7),
-(12, 'DM-08', 2, 'Tablet Android','tablet-android', NULL, 'dm-tablet.jpg','Máy tính bảng Samsung, Xiaomi và các hãng khác', 8),
-(13, 'DM-09', 3, 'Tai nghe',    'tai-nghe',    NULL, 'dm-headphone.jpg','Tai nghe true wireless và chụp tai', 9),
-(14, 'DM-10', 3, 'Sạc & Pin dự phòng','sac-pin-du-phong', NULL, 'dm-charger.jpg','Củ sạc, cáp sạc, pin dự phòng', 10),
-(15, 'DM-11', 3, 'Ốp lưng',     'op-lung',     NULL, 'dm-case.jpg',     'Ốp lưng và phụ kiện bảo vệ thiết bị', 11);
-
-INSERT INTO brands (id, name) VALUES
+(4,  'NM-04', NULL, 'Laptop',        'laptop',        'fa-laptop',               NULL, 'Nhóm máy tính xách tay',    4);INSERT INTO brands (id, name) VALUES
 (1,'Apple'),(2,'Samsung'),(3,'Xiaomi'),(4,'OPPO'),(5,'Anker'),(6,'Baseus'),(7,'UAG'),(8,'Sony');
 
 -- Sản phẩm (price = giá bán niêm yết, sale_price = giá giảm)
 INSERT INTO products
 (id, sku, category_id, brand_id, supplier_id, name, description, price, sale_price, stock, image, is_new, is_featured, is_bestseller) VALUES
-(1,'SP-8821',5,1,1,'iPhone 16 Pro Max 256GB',
- 'iPhone 16 Pro Max trang bị chip A18 Pro mạnh mẽ vượt trội, khung vỏ Titan cao cấp, nút Camera Control thế hệ mới cùng camera zoom quang học 5x sắc nét.',
- 34990000, 32990000, 25, 'iphone-16-pro-max.jpg', 1,1,1),
-(2,'SP-8822',6,2,2,'Samsung Galaxy S24 Ultra 5G',
- 'Flagship Android với bút S Pen, camera 200MP và bộ tính năng Galaxy AI thông minh.',
- 33990000, 27990000, 30, 'galaxy-s24-ultra.jpg', 0,1,1),
-(3,'SP-8823',7,3,3,'Xiaomi 14 Ultra 5G',
- 'Camera hợp tác Leica chuyên nghiệp, chip Snapdragon 8 Gen 3, sạc nhanh 90W.',
- 32990000, 26990000, 20, 'xiaomi-14-ultra.jpg', 1,1,0),
-(4,'SP-8824',11,4,4,'OPPO Find X7 Ultra',
- 'Hệ thống camera kép tiềm vọng Hasselblad, màn hình LTPO 120Hz, sạc nhanh 100W.',
- 25990000, 22990000, 18, 'oppo-find-x7-ultra.jpg', 1,1,0),
-(5,'SP-8825',9,1,1,'iPad Pro 13 inch M4 Wi-Fi 256GB',
- 'iPad Pro mỏng nhẹ kỷ lục trang bị chip Apple M4 thế hệ mới, màn hình Ultra Retina XDR OLED 2 lớp tân tiến nhất.',
- 37990000, 35990000, 15, 'ipad-pro-m4.jpg', 1,1,1),
-(6,'SP-8826',12,2,2,'Samsung Galaxy Tab S9 Ultra',
- 'Máy tính bảng Android cao cấp màn hình AMOLED 14.6 inch, kèm bút S Pen.',
- 30990000, 24990000, 8, 'galaxy-tab-s9-ultra.jpg', 0,0,0),
-(7,'SP-8827',12,3,3,'Xiaomi Pad 6S Pro 12.4',
- 'Máy tính bảng màn hình 12.4 inch 144Hz, chip Snapdragon 8 Gen 2, sạc nhanh 120W.',
- 14990000, 12990000, 22, 'xiaomi-pad-6s-pro.jpg', 1,0,1),
-(8,'SP-8828',13,1,1,'Tai nghe Apple AirPods Pro 2 USB-C',
- 'Tai nghe chống ồn chủ động ANC gấp 2 lần, hộp sạc chuẩn USB-C hỗ trợ MagSafe, âm thanh vòm Spatial Audio chủ động.',
- 6190000, 5490000, 40, 'airpods-pro-2.jpg', 0,1,1),
-(9,'SP-8829',14,5,5,'Sạc dự phòng Anker Prime 20,000mAh 200W',
- 'Pin dự phòng công suất cao 200W, màn hình TFT hiển thị dòng điện, sạc được cả laptop.',
- 3200000, 2690000, 35, 'anker-prime-20000.jpg', 1,0,0),
-(10,'SP-8830',14,6,5,'Củ sạc nhanh Baseus GaN5 Pro 65W Trippel',
- 'Củ sạc nhanh công nghệ GaN5 Pro 65W, 3 cổng sạc cùng lúc, nhỏ gọn tiện lợi.',
- 690000, 490000, 100, 'baseus-gan5-65w.jpg', 0,0,0),
-(11,'SP-8831',15,7,5,'Ốp lưng iPhone 16 Pro Max UAG Monarch Kevlar',
- 'Ốp lưng chống sốc 5 lớp cao cấp, đạt chuẩn quân đội Mỹ, hỗ trợ MagSafe.',
- 1750000, 1490000, 50, 'uag-monarch.jpg', 1,0,0),
-(12,'SP-8832',13,8,6,'Sony WH-1000XM5 Tai nghe Chống ồn cao cấp',
- 'Tai nghe chụp tai chống ồn hàng đầu, pin 30 giờ, âm thanh Hi-Res.',
- 8490000, 7490000, 28, 'sony-wh1000xm5.jpg', 0,0,0),
-(13,'SP-8833',8,1,1,'MacBook Pro 16 inch M3 Max',
- 'MacBook Pro 16 inch chip M3 Max, màn hình Liquid Retina XDR, hiệu năng đỉnh cao cho dân đồ họa và lập trình.',
- 72990000, 69990000, 12, 'macbook-pro-16.jpg', 0,0,0),
-(14,'SP-8834',14,5,5,'Sạc nhanh Anker 20W USB-C',
- 'Củ sạc nhanh 20W nhỏ gọn, tương thích iPhone và Android.',
- 390000, 350000, 5, 'anker-20w.jpg', 0,0,0),
-(15,'SP-8835',10,1,1,'Apple Watch Series 10 46mm',
- 'Đồng hồ thông minh Apple Watch Series 10 màn hình lớn, theo dõi sức khỏe toàn diện.',
- 11990000, 10990000, 22, 'apple-watch-s10.jpg', 1,0,0),
-(16,'SP-8836',7,3,3,'Xiaomi 14 Pro 5G 12GB',
- 'Xiaomi 14 Pro RAM 12GB, camera Leica, sạc nhanh 120W. (Tạm hết hàng)',
- 19990000, 18500000, 0, 'xiaomi-14-pro.jpg', 0,0,0);
+(1,'SP-8821',1,1,1,'iPhone 16 Pro Max 256GB', 'iPhone 16 Pro Max trang bị chip A18 Pro mạnh mẽ vượt trội...', 34990000, 32990000, 25, 'iphone-16-pro-max.jpg', 1,1,1),
+(2,'SP-8822',1,2,2,'Samsung Galaxy S24 Ultra 5G', 'Flagship Android với bút S Pen, camera 200MP...', 33990000, 27990000, 30, 'galaxy-s24-ultra.jpg', 0,1,1),
+(3,'SP-8823',1,3,3,'Xiaomi 14 Ultra 5G', 'Camera hợp tác Leica chuyên nghiệp, chip Snapdragon 8 Gen 3...', 32990000, 26990000, 20, 'xiaomi-14-ultra.jpg', 1,1,0),
+(4,'SP-8824',1,4,4,'OPPO Find X7 Ultra', 'Hệ thống camera kép tiềm vọng Hasselblad, màn hình LTPO...', 25990000, 22990000, 18, 'oppo-find-x7-ultra.jpg', 1,1,0),
+(5,'SP-8825',2,1,1,'iPad Pro 13 inch M4 Wi-Fi 256GB', 'iPad Pro mỏng nhẹ kỷ lục trang bị chip Apple M4...', 37990000, 35990000, 15, 'ipad-pro-m4.jpg', 1,1,1),
+(6,'SP-8826',2,2,2,'Samsung Galaxy Tab S9 Ultra', 'Máy tính bảng Android cao cấp màn hình AMOLED 14.6 inch...', 30990000, 24990000, 8, 'galaxy-tab-s9-ultra.jpg', 0,0,0),
+(7,'SP-8827',2,3,3,'Xiaomi Pad 6S Pro 12.4', 'Máy tính bảng màn hình 12.4 inch 144Hz, chip Snapdragon 8 Gen 2...', 14990000, 12990000, 22, 'xiaomi-pad-6s-pro.jpg', 1,0,1),
+(8,'SP-8828',3,1,1,'Tai nghe Apple AirPods Pro 2 USB-C', 'Tai nghe chống ồn chủ động ANC gấp 2 lần...', 6190000, 5490000, 40, 'airpods-pro-2.jpg', 0,1,1),
+(13,'SP-8833',4,1,1,'MacBook Pro 16 inch M3 Max', 'MacBook Pro 16 inch chip M3 Max, màn hình Liquid Retina...', 72990000, 69990000, 12, 'macbook-pro-16.jpg', 0,0,0),
+(15,'SP-8835',3,1,1,'Apple Watch Series 10 46mm', 'Đồng hồ thông minh Apple Watch Series 10 màn hình lớn...', 11990000, 10990000, 22, 'apple-watch-s10.jpg', 1,0,0),
+(16,'SP-8836',1,3,3,'Xiaomi 14 Pro 5G 12GB', 'Xiaomi 14 Pro RAM 12GB, camera Leica, sạc nhanh 120W...', 19990000, 18500000, 0, 'xiaomi-14-pro.jpg', 0,0,0);
 
 -- Giá nhập mẫu = 85% giá bán thực tế (làm tròn đến chục nghìn)
 UPDATE products SET cost_price = ROUND(COALESCE(sale_price, price) * 0.85, -4);
@@ -351,12 +301,7 @@ INSERT INTO product_colors (product_id, color_name) VALUES
 (6,'Xám'),(6,'Be'),
 (7,'Xanh'),(7,'Xám'),
 (8,'Trắng'),
-(9,'Đen'),
-(10,'Đen'),(10,'Trắng'),
-(11,'Đen'),
-(12,'Đen'),(12,'Bạc'),
 (13,'Bạc'),(13,'Đen Không Gian'),
-(14,'Trắng'),
 (15,'Đen Jet Black'),(15,'Bạc'),
 (16,'Đen'),(16,'Xanh');
 
@@ -369,12 +314,7 @@ INSERT INTO product_storages (product_id, storage, extra_price) VALUES
 (6,'256GB',0),(6,'512GB',4000000),
 (7,'256GB',0),
 (8,'Tiêu chuẩn',0),
-(9,'20000mAh',0),
-(10,'65W',0),
-(11,'Tiêu chuẩn',0),
-(12,'Tiêu chuẩn',0),
 (13,'1TB',0),(13,'2TB',15000000),
-(14,'20W',0),
 (15,'46mm',0),
 (16,'512GB',0);
 
@@ -398,16 +338,6 @@ INSERT INTO product_specs (product_id, spec_name, spec_value, sort_order) VALUES
 (8,'Thời lượng pin','6 giờ liên tục (30 giờ kèm hộp sạc)',3),
 (8,'Kháng nước','IP54',4),
 (8,'Cổng sạc','USB-C & MagSafe không dây',5),
-(9,'Dung lượng','20,000 mAh',1),
-(9,'Cổng ra','2x USB-C (100W max từng cổng), 1x USB-A (65W max)',2),
-(9,'Công suất tổng','200W Max',3),
-(9,'Màn hình','TFT LCD hiển thị dòng điện',4),
-(10,'Công suất','65W Max',1),
-(10,'Cổng giao tiếp','2x USB-C + 1x USB-A',2),
-(10,'Công nghệ','GaN5 Pro, BPS II chia điện thông minh',3),
-(11,'Chất liệu','Kevlar Dupont + Khung Polycarbonate + Cao su chịu lực',1),
-(11,'Tiêu chuẩn','Drop test MIL-STD 810G 516.6 (Rơi từ 6 mét)',2),
-(11,'Tương thích','MagSafe & Sạc không dây Qi',3),
 (13,'Màn hình','16.2 inch Liquid Retina XDR',1),
 (13,'Chip xử lý','Apple M3 Max 14-core CPU',2),
 (13,'RAM','36 GB',3),
@@ -419,7 +349,6 @@ INSERT INTO stock_imports (product_id, supplier_id, quantity, import_price, impo
 (2, 2, 40, 23800000, '2026-05-10', 'Nhập Galaxy S24 Ultra'),
 (5, 1, 20, 30600000, '2026-06-15', 'Nhập iPad Pro M4'),
 (8, 1, 50, 4670000,  '2026-07-01', 'Nhập AirPods Pro 2'),
-(9, 5, 40, 2290000,  '2026-08-12', 'Nhập pin dự phòng Anker'),
 (13,1, 15, 59500000, '2026-09-03', 'Nhập MacBook Pro 16 M3 Max');
 
 -- Danh mục bài viết + Bài viết
@@ -486,12 +415,8 @@ INSERT INTO order_items (order_id, product_id, product_name, color, storage, uni
 (3, 2,  'Samsung Galaxy S24 Ultra 5G',             'Xám Titan',      '256GB', 27990000, 1),
 (4, 8,  'Tai nghe Apple AirPods Pro 2 USB-C',      'Trắng',          'Tiêu chuẩn', 5490000, 2),
 (5, 5,  'iPad Pro 13 inch M4 Wi-Fi 256GB',         'Bạc (Silver)',   '256GB', 35990000, 1),
-(5, 10, 'Củ sạc nhanh Baseus GaN5 Pro 65W Trippel','Trắng',          '65W',   490000,   1),
-(6, 9,  'Sạc dự phòng Anker Prime 20,000mAh 200W', 'Đen',            '20000mAh', 2690000, 1),
-(6, 11, 'Ốp lưng iPhone 16 Pro Max UAG Monarch Kevlar','Đen',        'Tiêu chuẩn',1490000, 1),
 (7, 7,  'Xiaomi Pad 6S Pro 12.4',                  'Xanh',           '256GB', 12990000, 1),
 (8, 4,  'OPPO Find X7 Ultra',                      'Nâu',            '256GB', 22990000, 1),
-(9, 12, 'Sony WH-1000XM5 Tai nghe Chống ồn cao cấp','Đen',           'Tiêu chuẩn', 7490000, 1),
 (10,6,  'Samsung Galaxy Tab S9 Ultra',             'Xám',            '256GB', 24990000, 1);
 
 UPDATE order_items oi JOIN products p ON p.id = oi.product_id SET oi.cost_price = p.cost_price;
