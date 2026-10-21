@@ -2,7 +2,7 @@
 require_once '../config.php';
 include("xyly/xuly.php");
 
-$pageTitle = "Quản lý người dùng";
+$pageTitle = "Quản lý tài khoản";
 $p = new xuly();
 
 // Xử lý cập nhật quyền (role) hoặc trạng thái (status) 
@@ -41,7 +41,7 @@ $search_keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
 $role_filter    = isset($_GET['role']) ? trim($_GET['role']) : '';
 $status_filter  = isset($_GET['status']) ? trim($_GET['status']) : '';
 
-// Xây dựng câu truy vấn danh sách người dùng kèm đếm số lượng đơn hàng
+//Truy vấn danh sách người dùng kèm đếm số lượng đơn hàng
 $sql_users = "SELECT u.*, 
               (SELECT COUNT(*) FROM orders WHERE user_id = u.id) as total_orders 
               FROM users u WHERE 1=1";
@@ -73,11 +73,11 @@ include("includes/navbar.php");
     <div class="content-card">
         <div class="page-header">
             <div class="page-title">
-                <h1>Quản Lý Người Dùng</h1>
+                <h1>Quản Lý Tài Khoản</h1>
                 <p>Phân quyền, quản lý tài khoản và trạng thái hoạt động</p>
             </div>
             <a href="<?php echo BASE_URL; ?>/addnguoidung.php" class="btn-primary" title="Thêm người dùng mới">
-                <i class="fa-solid fa-plus"></i> <span>Thêm người dùng mới</span>
+                <i class="fa-solid fa-plus"></i> <span>Tạo tài khoản Admin</span>
             </a>
         </div>
 
@@ -123,7 +123,6 @@ include("includes/navbar.php");
                     if (!empty($list_users)) {
                         $stt = 1;
                         foreach ($list_users as $usr) {
-                            // Gán trực tiếp đường dẫn ảnh đại diện theo cấu trúc thư mục
                             $avatarSrc = '../uploads/avatar/' . $usr['avatar'];
                             $avatarDefault = '../uploads/avatar/null.jpg';
                             $finalAvatar = (!empty($usr['avatar'])) ? $avatarSrc : $avatarDefault;

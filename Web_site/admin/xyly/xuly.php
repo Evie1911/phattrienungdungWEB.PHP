@@ -48,4 +48,3 @@ class xuly extends csdltmdt
         return md5($pass . $salt);
     }
 }
-

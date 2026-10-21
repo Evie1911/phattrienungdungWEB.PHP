@@ -49,7 +49,7 @@ if (isset($_POST['nut'])) {
 
                     $image_val = ($imageName !== NULL) ? "'$imageName'" : "NULL";
 
-                    // Câu lệnh UPDATE khớp đúng với các cột thực tế của bảng articles
+                    // Câu lệnh UPDATE 
                     $sql = "UPDATE articles SET 
                             article_code = '$article_code', 
                             category_id = '$category_id', 
@@ -137,10 +137,8 @@ if (!empty($article_info)) {
 // Lấy danh sách danh mục bài viết cho thẻ select
 $categories = $db->xuatdulieu("SELECT id, name FROM news_categories");
 
-// Cấu hình tiêu đề trang
 $pageTitle = "Cập nhật bài viết";
 
-// Nhúng các thành phần giao diện chung
 include("includes/header.php");
 include("includes/sidebar.php");
 include("includes/navbar.php");
@@ -148,8 +146,6 @@ include("includes/navbar.php");
 
 <main class="main-content" style="margin-top: 20px;">
     <div class="form-scroll-container" style="background-color: white; padding: 20px; border-radius: 12px;">
-
-        <!-- Tiêu đề và đường dẫn -->
         <div class="product-header-wrap">
             <div class="product-title-area">
                 <h1>Cập nhật bài viết: <?php echo htmlspecialchars($article_code); ?></h1>
@@ -159,7 +155,6 @@ include("includes/navbar.php");
             </div>
         </div>
 
-        <!-- Các nút bổ sung nhanh danh mục bài viết -->
         <div class="quick-action-group">
             <button type="button" class="btn-quick-action nut-them"
                 data-action="news_category"
@@ -170,25 +165,20 @@ include("includes/navbar.php");
             </button>
         </div>
 
-        <!-- Form chính -->
         <form id="updateArticleForm" action="" method="POST" enctype="multipart/form-data">
-            <!-- ID ẩn truyền vào -->
             <input type="hidden" name="txtid" value="<?php echo $layid; ?>">
 
             <div class="product-form-grid">
-                <!-- Mã bài viết -->
                 <div class="product-field-group">
                     <label>Mã bài viết</label>
                     <input type="text" name="article_code" class="product-input" value="<?php echo htmlspecialchars($article_code); ?>" readonly style="background-color: #f1f5f9; cursor: not-allowed;" required>
                 </div>
 
-                <!-- Tiêu đề bài viết -->
                 <div class="product-field-group">
                     <label>Tiêu đề bài viết</label>
                     <input type="text" name="title" class="product-input" value="<?php echo htmlspecialchars($title); ?>" placeholder="Nhập tiêu đề bài viết..." required>
                 </div>
 
-                <!-- Danh mục bài viết -->
                 <div class="product-field-group">
                     <label>Danh mục bài viết</label>
                     <select name="category_id" class="product-input" required>
@@ -203,7 +193,6 @@ include("includes/navbar.php");
                     </select>
                 </div>
 
-                <!-- Trạng thái bài viết -->
                 <div class="product-field-group">
                     <label>Trạng thái</label>
                     <select name="status" class="product-input" required>
@@ -213,7 +202,6 @@ include("includes/navbar.php");
                     </select>
                 </div>
 
-                <!-- Hiển thị / Ẩn bài viết -->
                 <div class="product-field-group">
                     <label>Hiển thị / Ẩn</label>
                     <select name="is_visible" class="product-input" required>
@@ -222,19 +210,16 @@ include("includes/navbar.php");
                     </select>
                 </div>
 
-                <!-- Tác giả -->
                 <div class="product-field-group">
                     <label>Tác giả</label>
                     <input type="text" name="author" class="product-input" value="<?php echo htmlspecialchars($author); ?>" placeholder="Nhập tên tác giả..." required>
                 </div>
 
-                <!-- Ngày đăng -->
                 <div class="product-field-group">
                     <label>Ngày đăng</label>
                     <input type="datetime-local" name="published_at" class="product-input" value="<?php echo $published_at; ?>">
                 </div>
 
-                <!-- Ảnh đại diện bài viết -->
                 <div class="product-field-group span-4">
                     <label>Ảnh đại diện (Thumbnail)</label>
                     <div style="margin-bottom: 10px;">
@@ -252,26 +237,22 @@ include("includes/navbar.php");
                     <span id="hiententen" style="font-size: 14px; color: #0f172a; font-weight: 500; font-style: italic;"></span>
                 </div>
 
-                <!-- Tóm tắt ngắn -->
                 <div class="product-field-group span-4">
                     <label>Tóm tắt ngắn</label>
                     <textarea name="summary" class="product-input" placeholder="Nhập tóm tắt ngắn về nội dung bài viết..." style="height: 80px;"><?php echo htmlspecialchars($summary); ?></textarea>
                 </div>
 
-                <!-- Nội dung chi tiết bài viết -->
                 <div class="product-field-group span-4">
                     <label>Nội dung chi tiết</label>
                     <textarea name="content" class="product-input" placeholder="Nhập nội dung chi tiết bài viết..." style="height: 200px;" required><?php echo htmlspecialchars($content); ?></textarea>
                 </div>
             </div>
 
-            <!-- Nút hành động Lưu & Hủy -->
             <div class="product-form-actions" style="margin-top: 20px;">
                 <button type="submit" class="btn-submit-save">
                     Lưu lại
                 </button>
 
-                <!-- Nút hủy bỏ -->
                 <a href="<?php echo BASE_URL; ?>/qlbaiviet.php" class="btn-submit-cancel nutHuy"
                     data-type="bài viết"
                     data-redirect="<?php echo BASE_URL; ?>/qlbaiviet.php">
@@ -286,7 +267,7 @@ include("includes/navbar.php");
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Xử lý xác nhận submit form cập nhật bài viết bằng SweetAlert2
+        // Xử lý xác nhận submit form cập nhật bài viết
         const updateForm = document.getElementById('updateArticleForm');
         if (updateForm) {
             updateForm.addEventListener('submit', function(e) {
@@ -316,7 +297,7 @@ include("includes/navbar.php");
             });
         }
 
-        // Xử lý nút thêm nhanh danh mục bài viết bằng AJAX qua SweetAlert2
+        // Xử lý nút thêm nhanh danh mục bài viết bằng AJAX
         document.querySelectorAll(".nut-them").forEach((button) => {
             button.addEventListener("click", function(e) {
                 e.preventDefault();

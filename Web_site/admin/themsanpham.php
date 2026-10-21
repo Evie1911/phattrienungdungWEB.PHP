@@ -61,6 +61,49 @@ if (isset($_POST['nut'])) {
 
                 // Thông báo kết quả bằng SweetAlert
                 if ($db->themxoasua($sql)) {
+                    // Lấy ID của sản phẩm vừa được thêm vào
+                    $new_product_id = null;
+                    $res_id = $db->xuatdulieu("SELECT id FROM products ORDER BY id DESC LIMIT 1");
+                    if (!empty($res_id)) {
+                        $new_product_id = $res_id[0]['id'];
+                    }
+
+                    if ($new_product_id) {
+                        // 1. Lưu màu sắc
+                        if (isset($_POST['product_colors']) && is_array($_POST['product_colors'])) {
+                            foreach ($_POST['product_colors'] as $color) {
+                                $color = trim($color);
+                                if (!empty($color)) {
+                                    $sql_color = "INSERT INTO product_colors (product_id, color_name) VALUES ('$new_product_id', '$color')";
+                                    $db->themxoasua($sql_color);
+                                }
+                            }
+                        }
+
+                        // 2. Lưu dung lượng
+                        if (isset($_POST['storage_names']) && is_array($_POST['storage_names'])) {
+                            for ($i = 0; $i < count($_POST['storage_names']); $i++) {
+                                $st_name = trim($_POST['storage_names'][$i]);
+                                $st_price = floatval(str_replace(['.', ','], '', $_POST['storage_prices'][$i] ?? 0));
+                                if (!empty($st_name)) {
+                                    $sql_storage = "INSERT INTO product_storages (product_id, storage, extra_price) VALUES ('$new_product_id', '$st_name', '$st_price')";
+                                    $db->themxoasua($sql_storage);
+                                }
+                            }
+                        }
+
+                        // 3. Lưu thông số kỹ thuật
+                        if (isset($_POST['spec_names']) && is_array($_POST['spec_names'])) {
+                            for ($i = 0; $i < count($_POST['spec_names']); $i++) {
+                                $sp_name = trim($_POST['spec_names'][$i]);
+                                $sp_value = trim($_POST['spec_values'][$i] ?? '');
+                                if (!empty($sp_name) && !empty($sp_value)) {
+                                    $sql_spec = "INSERT INTO product_specs (product_id, spec_name, spec_value, sort_order) VALUES ('$new_product_id', '$sp_name', '$sp_value', '$i')";
+                                    $db->themxoasua($sql_spec);
+                                }
+                            }
+                        }
+                    }
                     echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
                             Swal.fire({
@@ -219,6 +262,41 @@ include 'includes/navbar.php';
                     <label>Mô tả sản phẩm</label>
                     <textarea name="description" class="product-input" placeholder="Nhập mô tả chi tiết sản phẩm..."></textarea>
                 </div>
+                <!-- BỔ SUNG: Phần Màu sắc, Dung lượng và Thông số kỹ thuật -->
+                <div class="product-field-group span-4" style="border-top: 1px dashed #cbd5e1; padding-top: 15px; margin-top: 10px;">
+                    <label style="font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 10px;">1. Màu sắc sản phẩm (Mỗi dòng một màu)</label>
+                    <div id="color-container">
+                        <div class="input-group-row" style="display: flex; gap: 10px; margin-bottom: 8px;">
+                            <input type="text" name="product_colors[]" class="product-input" placeholder="Ví dụ: Titan Tự Nhiên">
+                            <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <button type="button" id="add-color-btn" style="padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;"><i class="fa-solid fa-plus"></i> Thêm màu sắc</button>
+                </div>
+
+                <div class="product-field-group span-4" style="border-top: 1px dashed #cbd5e1; padding-top: 15px; margin-top: 10px;">
+                    <label style="font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 10px;">2. Phiên bản / Dung lượng & Giá chênh lệch</label>
+                    <div id="storage-container">
+                        <div class="input-group-row" style="display: flex; gap: 10px; margin-bottom: 8px;">
+                            <input type="text" name="storage_names[]" class="product-input" placeholder="Dung lượng (VD: 256GB)" style="flex: 2;">
+                            <input type="text" name="storage_prices[]" class="product-input" placeholder="Giá chênh lệch (VD: 5000000)" style="flex: 2;">
+                            <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <button type="button" id="add-storage-btn" style="padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;"><i class="fa-solid fa-plus"></i> Thêm dung lượng</button>
+                </div>
+
+                <div class="product-field-group span-4" style="border-top: 1px dashed #cbd5e1; padding-top: 15px; margin-top: 10px;">
+                    <label style="font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 10px;">3. Thông số kỹ thuật chi tiết</label>
+                    <div id="spec-container">
+                        <div class="input-group-row" style="display: flex; gap: 10px; margin-bottom: 8px;">
+                            <input type="text" name="spec_names[]" class="product-input" placeholder="Tên thông số (VD: Màn hình)" style="flex: 2;">
+                            <input type="text" name="spec_values[]" class="product-input" placeholder="Giá trị (VD: 6.9 inch OLED)" style="flex: 3;">
+                            <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <button type="button" id="add-spec-btn" style="padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;"><i class="fa-solid fa-plus"></i> Thêm thông số</button>
+                </div>
             </div>
 
             <div class="product-form-actions">
@@ -334,6 +412,41 @@ include 'includes/navbar.php';
                 });
             });
         });
+    });
+</script>
+
+<script>
+    // BỔ SUNG: Script xử lý thêm/xóa dòng động cho Màu sắc, Dung lượng, Thông số
+    document.getElementById('add-color-btn').addEventListener('click', function() {
+        const container = document.getElementById('color-container');
+        const row = document.createElement('div');
+        row.className = 'input-group-row';
+        row.style.cssText = 'display: flex; gap: 10px; margin-bottom: 8px;';
+        row.innerHTML = `<input type="text" name="product_colors[]" class="product-input" placeholder="Màu Sắc">
+                         <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>`;
+        container.appendChild(row);
+    });
+
+    document.getElementById('add-storage-btn').addEventListener('click', function() {
+        const container = document.getElementById('storage-container');
+        const row = document.createElement('div');
+        row.className = 'input-group-row';
+        row.style.cssText = 'display: flex; gap: 10px; margin-bottom: 8px;';
+        row.innerHTML = `<input type="text" name="storage_names[]" class="product-input" placeholder="Dung lượng" style="flex: 2;">
+                         <input type="text" name="storage_prices[]" class="product-input" placeholder="Giá chênh lệch" style="flex: 2;">
+                         <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>`;
+        container.appendChild(row);
+    });
+
+    document.getElementById('add-spec-btn').addEventListener('click', function() {
+        const container = document.getElementById('spec-container');
+        const row = document.createElement('div');
+        row.className = 'input-group-row';
+        row.style.cssText = 'display: flex; gap: 10px; margin-bottom: 8px;';
+        row.innerHTML = `<input type="text" name="spec_names[]" class="product-input" placeholder="Tên thông số" style="flex: 2;">
+                         <input type="text" name="spec_values[]" class="product-input" placeholder="Giá trị" style="flex: 3;">
+                         <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>`;
+        container.appendChild(row);
     });
 </script>
 

@@ -20,7 +20,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_status') {
     $current_order = $p->xuatdulieu("SELECT order_status FROM orders WHERE id = '$order_id' LIMIT 1");
     if (!empty($current_order)) {
         $old_status = $current_order[0]['order_status'];
-        // Nếu trạng thái cũ là 'Đã hủy' thì không cho sửa nữa
+        // Nếu trạng thái là 'Đã hủy' thì không cho sửa nữa
         if ($old_status === 'Đã hủy' || $old_status === 'Hoàn thành') {
             echo json_encode(['status' => 'error', 'message' => 'Đơn hàng đã kết thúc, không thể thay đổi trạng thái!']);
             exit();
@@ -50,7 +50,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_order_detail') {
     $order_info = $p->xuatdulieu("SELECT * FROM orders o LEFT JOIN payments p ON o.id = p.order_id WHERE o.id = '$order_id' LIMIT 1");
     // Lấy danh sách sản phẩm trong đơn hàng
     $order_items = $p->xuatdulieu("SELECT * FROM order_items WHERE order_id = '$order_id'");
-
+    //nếu có chuyển mảng thành chuỗi dinh dang json 
     if (!empty($order_info)) {
         echo json_encode([
             'status' => 'success',
@@ -100,24 +100,24 @@ include("includes/navbar.php");
             </div>
         </div>
 
-            <form method="GET" action="" class="filter-section">
-                <div class="search-box" style="flex: 1;">
-                    <input type="text" name="keyword" id="searchOrderInput" value="<?php echo htmlspecialchars($search_keyword); ?>" placeholder="Tìm theo mã đơn hàng, tên khách hàng, số điện thoại...">
-                </div>
-                <select name="status" class="filter-select" id="filterStatus">
-                    <option value="">-- Trạng thái đơn hàng --</option>
-                    <option value="Chờ xác nhận" <?php echo ($status_filter === 'Chờ xác nhận') ? 'selected' : ''; ?>>Chờ xác nhận</option>
-                    <option value="Đã xác nhận" <?php echo ($status_filter === 'Đã xác nhận') ? 'selected' : ''; ?>>Đã xác nhận</option>
-                    <option value="Đang đóng gói" <?php echo ($status_filter === 'Đang đóng gói') ? 'selected' : ''; ?>>Đang đóng gói</option>
-                    <option value="Đang giao hàng" <?php echo ($status_filter === 'Đang giao hàng') ? 'selected' : ''; ?>>Đang giao hàng</option>
-                    <option value="Hoàn thành" <?php echo ($status_filter === 'Hoàn thành') ? 'selected' : ''; ?>>Hoàn thành</option>
-                    <option value="Đã hủy" <?php echo ($status_filter === 'Đã hủy') ? 'selected' : ''; ?>>Đã hủy</option>
-                </select>
-                <button type="submit" class="btn-filter">Tìm kiếm</button>
-                <?php if ($search_keyword !== '' || $status_filter !== ''): ?>
-                    <a href="donhang.php" style="text-decoration: none;">Làm mới</a>
-                <?php endif; ?>
-            </form>
+        <form method="GET" action="" class="filter-section">
+            <div class="search-box" style="flex: 1;">
+                <input type="text" name="keyword" id="searchOrderInput" value="<?php echo htmlspecialchars($search_keyword); ?>" placeholder="Tìm theo mã đơn hàng, tên khách hàng, số điện thoại...">
+            </div>
+            <select name="status" class="filter-select" id="filterStatus">
+                <option value="">-- Trạng thái đơn hàng --</option>
+                <option value="Chờ xác nhận" <?php echo ($status_filter === 'Chờ xác nhận') ? 'selected' : ''; ?>>Chờ xác nhận</option>
+                <option value="Đã xác nhận" <?php echo ($status_filter === 'Đã xác nhận') ? 'selected' : ''; ?>>Đã xác nhận</option>
+                <option value="Đang đóng gói" <?php echo ($status_filter === 'Đang đóng gói') ? 'selected' : ''; ?>>Đang đóng gói</option>
+                <option value="Đang giao hàng" <?php echo ($status_filter === 'Đang giao hàng') ? 'selected' : ''; ?>>Đang giao hàng</option>
+                <option value="Hoàn thành" <?php echo ($status_filter === 'Hoàn thành') ? 'selected' : ''; ?>>Hoàn thành</option>
+                <option value="Đã hủy" <?php echo ($status_filter === 'Đã hủy') ? 'selected' : ''; ?>>Đã hủy</option>
+            </select>
+            <button type="submit" class="btn-filter">Tìm kiếm</button>
+            <?php if ($search_keyword !== '' || $status_filter !== ''): ?>
+                <a href="donhang.php" style="text-decoration: none;">Làm mới</a>
+            <?php endif; ?>
+        </form>
 
         <div class="table-container">
             <table>

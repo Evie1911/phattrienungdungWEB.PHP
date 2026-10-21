@@ -161,8 +161,6 @@ include("includes/navbar.php");
     </div>
 </main>
 
-<!-- Thư viện SweetAlert2 CDN -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- Script thông báo thành công khi xóa -->
 <?php if (isset($_GET['msg']) && $_GET['msg'] === 'deleted'): ?>
@@ -181,7 +179,7 @@ include("includes/navbar.php");
     </script>
 <?php endif; ?>
 
-<!-- Script bắt sự kiện click nút xóa bằng SweetAlert2 -->
+<!-- Script bắt sự kiện click nút xóa bằng -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.nutxoa').forEach(button => {

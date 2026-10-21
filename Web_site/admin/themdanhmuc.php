@@ -16,7 +16,7 @@ if (isset($_POST['nut'])) {
             $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $category_name), '-')) . '-' . rand(1000, 9999);
             if ($category_code !== '' && $category_name !== '') {
 
-                // Xử lý upload ảnh sử dụng phương thức uploadfile
+                // Xử lý upload ảnh
                 $imageName = NULL;
                 if (isset($_FILES['category_image']) && $_FILES['category_image']['error'] === UPLOAD_ERR_OK) {
                     $tmp_name      = $_FILES['category_image']['tmp_name'];
@@ -37,7 +37,7 @@ if (isset($_POST['nut'])) {
 
                 $image_val = ($imageName !== NULL) ? "'$imageName'" : "NULL";
 
-                // Câu lệnh INSERT vào bảng categories
+                // INSERT vào bảng categories
                 $sql = "INSERT INTO categories (category_code, name, slug, description, image, status) 
                         VALUES ('$category_code', '$category_name', '$slug', '$description', $image_val, 1)";
 

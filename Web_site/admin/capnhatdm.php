@@ -132,7 +132,6 @@ include("includes/navbar.php");
         </div>
 
         <form id="updateCategoryForm" action="" method="POST" enctype="multipart/form-data">
-            <!-- ID ẩn dùng cho quá trình cập nhật -->
             <input type="hidden" name="txtid" value="<?php echo $layid; ?>">
 
             <div class="product-form-grid">

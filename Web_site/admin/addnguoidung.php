@@ -37,7 +37,7 @@ if (isset($_POST['nut'])) {
                     // Mã hóa mật khẩu bằng password_hash()
                     $hashed_password = password_hash($raw_pass, PASSWORD_DEFAULT);
 
-                    // Xử lý upload ảnh đại diện sử dụng phương thức uploadfile
+                    // Xử lý  uploadfile
                     $avatarName = NULL;
                     if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
                         $tmp_name      = $_FILES['avatar']['tmp_name'];
@@ -122,7 +122,6 @@ include("includes/navbar.php");
             </div>
         </div>
 
-        <!-- Form chính -->
         <form id="userForm" action="" method="POST" enctype="multipart/form-data">
 
             <div class="product-form-grid">

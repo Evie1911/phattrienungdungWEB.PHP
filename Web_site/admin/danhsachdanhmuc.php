@@ -36,10 +36,10 @@ if (isset($_REQUEST['nut']) && $_REQUEST['nut'] === 'Xóa danh mục') {
     }
 }
 
-// Nhận từ khóa tìm kiếm (GET)
+// Nhận từ khóa tìm kiếm 
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-// Xây dựng câu lệnh SQL truy vấn bảng categories
+// lệnh SQL truy vấn bảng categories
 $sql = "SELECT * FROM categories WHERE 1=1";
 if ($search !== '') {
     $sql .= " AND name LIKE '%$search%'";

@@ -53,12 +53,81 @@ if (isset($_POST['nut'])) {
 
                     $clean_price    = floatval(str_replace(['.', ','], '', $price));
 
-                    // Câu lệnh UPDATE chính xác theo cấu trúc bảng products
+                    // Câu lệnh UPDATE
                     $sql = "UPDATE products SET sku = '$sku', category_id = '$category_id', brand_id = '$brand_id', supplier_id = $supplier_val, 
                     name = '$name', description = '$description', price = '$clean_price', sale_price = " . ($sale_price_val ? "'$sale_price_val'" : "NULL") . ", stock 
                     = '$clean_stock', condition_text = '$condition_text', image = $image_val, updated_at = NOW() WHERE id = '$myid' LIMIT 1";
 
                     if ($db->themxoasua($sql)) {
+
+                        // CẬP NHẬT MÀU SẮC (Giữ cũ, Cập nhật tên nếu sửa, Thêm mới nếu có, Xóa nếu bị bớt)
+                        $submitted_color_ids = $_POST['color_ids'] ?? [];
+                        $existing_colors = $db->xuatdulieu("SELECT id FROM product_colors WHERE product_id = '$myid'");
+                        foreach ($existing_colors as $ec) {
+                            if (!in_array($ec['id'], $submitted_color_ids)) {
+                                $db->themxoasua("DELETE FROM product_colors WHERE id = '{$ec['id']}'");
+                            }
+                        }
+                        if (isset($_POST['product_colors']) && is_array($_POST['product_colors'])) {
+                            for ($i = 0; $i < count($_POST['product_colors']); $i++) {
+                                $c_id = $_POST['color_ids'][$i] ?? 0;
+                                $c_name = trim($_POST['product_colors'][$i]);
+                                if (!empty($c_name)) {
+                                    if ($c_id > 0) {
+                                        $db->themxoasua("UPDATE product_colors SET color_name = '$c_name' WHERE id = '$c_id'");
+                                    } else {
+                                        $db->themxoasua("INSERT INTO product_colors (product_id, color_name) VALUES ('$myid', '$c_name')");
+                                    }
+                                }
+                            }
+                        }
+
+                        // CẬP NHẬT DUNG LƯỢNG
+                        $submitted_storage_ids = $_POST['storage_ids'] ?? [];
+                        $existing_storages = $db->xuatdulieu("SELECT id FROM product_storages WHERE product_id = '$myid'");
+                        foreach ($existing_storages as $es) {
+                            if (!in_array($es['id'], $submitted_storage_ids)) {
+                                $db->themxoasua("DELETE FROM product_storages WHERE id = '{$es['id']}'");
+                            }
+                        }
+                        if (isset($_POST['storage_names']) && is_array($_POST['storage_names'])) {
+                            for ($i = 0; $i < count($_POST['storage_names']); $i++) {
+                                $st_id = $_POST['storage_ids'][$i] ?? 0;
+                                $st_name = trim($_POST['storage_names'][$i]);
+                                $st_price = floatval(str_replace(['.', ','], '', $_POST['storage_prices'][$i] ?? 0));
+                                if (!empty($st_name)) {
+                                    if ($st_id > 0) {
+                                        $db->themxoasua("UPDATE product_storages SET storage = '$st_name', extra_price = '$st_price' WHERE id = '$st_id'");
+                                    } else {
+                                        $db->themxoasua("INSERT INTO product_storages (product_id, storage, extra_price) VALUES ('$myid', '$st_name', '$st_price')");
+                                    }
+                                }
+                            }
+                        }
+
+                        // CẬP NHẬT THÔNG SỐ KỸ THUẬT
+                        $submitted_spec_ids = $_POST['spec_ids'] ?? [];
+                        $existing_specs = $db->xuatdulieu("SELECT id FROM product_specs WHERE product_id = '$myid'");
+                        foreach ($existing_specs as $esp) {
+                            if (!in_array($esp['id'], $submitted_spec_ids)) {
+                                $db->themxoasua("DELETE FROM product_specs WHERE id = '{$esp['id']}'");
+                            }
+                        }
+                        if (isset($_POST['spec_names']) && is_array($_POST['spec_names'])) {
+                            for ($i = 0; $i < count($_POST['spec_names']); $i++) {
+                                $sp_id = $_POST['spec_ids'][$i] ?? 0;
+                                $sp_name = trim($_POST['spec_names'][$i]);
+                                $sp_value = trim($_POST['spec_values'][$i] ?? '');
+                                if (!empty($sp_name) && !empty($sp_value)) {
+                                    if ($sp_id > 0) {
+                                        $db->themxoasua("UPDATE product_specs SET spec_name = '$sp_name', spec_value = '$sp_value', sort_order = '$i' WHERE id = '$sp_id'");
+                                    } else {
+                                        $db->themxoasua("INSERT INTO product_specs (product_id, spec_name, spec_value, sort_order) VALUES ('$myid', '$sp_name', '$sp_value', '$i')");
+                                    }
+                                }
+                            }
+                        }
+
                         echo "<script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 Swal.fire({
@@ -116,6 +185,10 @@ if (!empty($product_info)) {
     $condition_text = $row['condition_text'];
     $description    = $row['description'];
     $image          = $row['image'];
+
+    $colors_list   = $db->xuatdulieu("SELECT * FROM product_colors WHERE product_id = '$layid'");
+    $storages_list = $db->xuatdulieu("SELECT * FROM product_storages WHERE product_id = '$layid'");
+    $specs_list    = $db->xuatdulieu("SELECT * FROM product_specs WHERE product_id = '$layid' ORDER BY sort_order ASC");
 } else {
     $sku            = '';
     $product_name   = '';
@@ -128,9 +201,11 @@ if (!empty($product_info)) {
     $condition_text = '';
     $description    = '';
     $image          = '';
+    $colors_list   = [];
+    $storages_list = [];
+    $specs_list    = [];
 }
 
-// Lấy dữ liệu cho các thẻ Select
 $categories = $db->xuatdulieu("SELECT id, name FROM categories WHERE status = 1");
 $brands     = $db->xuatdulieu("SELECT id, name FROM brands");
 $suppliers  = $db->xuatdulieu("SELECT id, name FROM suppliers");
@@ -154,9 +229,7 @@ include("includes/navbar.php");
             </div>
         </div>
 
-
         <form id="updateProductForm" action="" method="POST" enctype="multipart/form-data">
-            <!-- ID ẩn truyền vào -->
             <input type="hidden" name="txtid" value="<?php echo $layid; ?>">
 
             <div class="product-form-grid">
@@ -249,6 +322,59 @@ include("includes/navbar.php");
                     <span id="hiententen" style="font-size: 14px; color: #0f172a; font-weight: 500; font-style: italic;"></span>
                 </div>
 
+                <!-- MÀU SẮC -->
+                <div class="product-field-group span-4" style="border-top: 1px dashed #cbd5e1; padding-top: 15px; margin-top: 10px;">
+                    <label style="font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 10px;">1. Màu sắc sản phẩm</label>
+                    <div id="color-container">
+                        <?php if (!empty($colors_list)): ?>
+                            <?php foreach ($colors_list as $col): ?>
+                                <div class="input-group-row" style="display: flex; gap: 10px; margin-bottom: 8px;">
+                                    <input type="hidden" name="color_ids[]" value="<?php echo $col['id']; ?>">
+                                    <input type="text" name="product_colors[]" class="product-input" value="<?php echo htmlspecialchars($col['color_name']); ?>" placeholder="Ví dụ: Titan Tự Nhiên">
+                                    <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    <button type="button" id="add-color-btn" style="padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;"><i class="fa-solid fa-plus"></i> Thêm màu sắc</button>
+                </div>
+
+                <!-- DUNG LƯỢNG -->
+                <div class="product-field-group span-4" style="border-top: 1px dashed #cbd5e1; padding-top: 15px; margin-top: 10px;">
+                    <label style="font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 10px;">2. Phiên bản / Dung lượng & Giá chênh lệch</label>
+                    <div id="storage-container">
+                        <?php if (!empty($storages_list)): ?>
+                            <?php foreach ($storages_list as $st): ?>
+                                <div class="input-group-row" style="display: flex; gap: 10px; margin-bottom: 8px;">
+                                    <input type="hidden" name="storage_ids[]" value="<?php echo $st['id']; ?>">
+                                    <input type="text" name="storage_names[]" class="product-input" value="<?php echo htmlspecialchars($st['storage']); ?>" placeholder="Dung lượng (VD: 256GB)" style="flex: 2;">
+                                    <input type="text" name="storage_prices[]" class="product-input" value="<?php echo $st['extra_price']; ?>" placeholder="Giá chênh lệch (VD: 5000000)" style="flex: 2;">
+                                    <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    <button type="button" id="add-storage-btn" style="padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;"><i class="fa-solid fa-plus"></i> Thêm dung lượng</button>
+                </div>
+
+                <!-- THÔNG SỐ KỸ THUẬT -->
+                <div class="product-field-group span-4" style="border-top: 1px dashed #cbd5e1; padding-top: 15px; margin-top: 10px;">
+                    <label style="font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 10px;">3. Thông số kỹ thuật chi tiết</label>
+                    <div id="spec-container">
+                        <?php if (!empty($specs_list)): ?>
+                            <?php foreach ($specs_list as $sp): ?>
+                                <div class="input-group-row" style="display: flex; gap: 10px; margin-bottom: 8px;">
+                                    <input type="hidden" name="spec_ids[]" value="<?php echo $sp['id']; ?>">
+                                    <input type="text" name="spec_names[]" class="product-input" value="<?php echo htmlspecialchars($sp['spec_name']); ?>" placeholder="Tên thông số (VD: Màn hình)" style="flex: 2;">
+                                    <input type="text" name="spec_values[]" class="product-input" value="<?php echo htmlspecialchars($sp['spec_value']); ?>" placeholder="Giá trị (VD: 6.9 inch)" style="flex: 3;">
+                                    <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    <button type="button" id="add-spec-btn" style="padding: 6px 12px; background: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;"><i class="fa-solid fa-plus"></i> Thêm thông số</button>
+                </div>
+
                 <div class="product-field-group span-4">
                     <label>Mô tả sản phẩm</label>
                     <textarea name="description" class="product-input" placeholder="Nhập mô tả chi tiết sản phẩm..."><?php echo htmlspecialchars($description); ?></textarea>
@@ -276,7 +402,6 @@ include("includes/navbar.php");
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Xử lý submit form cập nhật sản phẩm bằng SweetAlert2
         const updateForm = document.getElementById('updateProductForm');
         if (updateForm) {
             updateForm.addEventListener('submit', function(e) {
@@ -305,6 +430,42 @@ include("includes/navbar.php");
                 });
             });
         }
+
+        // Thêm dòng mới (id="" để hệ thống hiểu đây là dòng mới cần INSERT)
+        document.getElementById('add-color-btn')?.addEventListener('click', function() {
+            const container = document.getElementById('color-container');
+            const row = document.createElement('div');
+            row.className = 'input-group-row';
+            row.style.cssText = 'display: flex; gap: 10px; margin-bottom: 8px;';
+            row.innerHTML = `<input type="hidden" name="color_ids[]" value="">
+                             <input type="text" name="product_colors[]" class="product-input" placeholder="Ví dụ: Titan Đen">
+                             <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>`;
+            container.appendChild(row);
+        });
+
+        document.getElementById('add-storage-btn')?.addEventListener('click', function() {
+            const container = document.getElementById('storage-container');
+            const row = document.createElement('div');
+            row.className = 'input-group-row';
+            row.style.cssText = 'display: flex; gap: 10px; margin-bottom: 8px;';
+            row.innerHTML = `<input type="hidden" name="storage_ids[]" value="">
+                             <input type="text" name="storage_names[]" class="product-input" placeholder="Dung lượng (VD: 512GB)" style="flex: 2;">
+                             <input type="text" name="storage_prices[]" class="product-input" placeholder="Giá chênh lệch (VD: 3000000)" style="flex: 2;">
+                             <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>`;
+            container.appendChild(row);
+        });
+
+        document.getElementById('add-spec-btn')?.addEventListener('click', function() {
+            const container = document.getElementById('spec-container');
+            const row = document.createElement('div');
+            row.className = 'input-group-row';
+            row.style.cssText = 'display: flex; gap: 10px; margin-bottom: 8px;';
+            row.innerHTML = `<input type="hidden" name="spec_ids[]" value="">
+                             <input type="text" name="spec_names[]" class="product-input" placeholder="Tên thông số" style="flex: 2;">
+                             <input type="text" name="spec_values[]" class="product-input" placeholder="Giá trị" style="flex: 3;">
+                             <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()" style="padding: 0 12px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-trash"></i></button>`;
+            container.appendChild(row);
+        });
     });
 </script>
 

@@ -24,7 +24,7 @@ $stock_filter = isset($_GET['stock_status']) ? trim($_GET['stock_status']) : '';
 // Xây dựng câu lệnh SQL động dựa trên bộ lọc
 $sql = "SELECT * FROM products WHERE 1=1";
 if ($search !== '') {
-    $sql .= " AND (name LIKE '%$search\%' OR sku LIKE '\%$search%')";
+    $sql .= " AND name LIKE '%" . $search . "%'";
 }
 if ($cat_filter !== '') {
     $sql .= " AND category_id = '$cat_filter'";
