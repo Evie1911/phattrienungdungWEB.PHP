@@ -23,7 +23,7 @@
             <a href="<?php echo BASE_URL; ?>/index.php" class="menu-item active"><i class="fa-solid fa-chart-pie"></i><span>Bảng điều khiển</span></a>
             <a href="<?php echo BASE_URL; ?>/danhsachsanpham.php" class="menu-item"><i class="fa-solid fa-mobile-screen-button"></i><span>Quản lý sản phẩm</span></a>
             <a href="<?php echo BASE_URL; ?>/danhsachdanhmuc.php" class="menu-item"><i class="fa-solid fa-list"></i><span>Quản lý danh mục</span></a>
-            <a href="<?php echo BASE_URL; ?>/donhang.php" class="menu-item"><i class="fa-solid fa-cart-shopping"></i><span>Quản lý đơn hàng</span></a>
+            <a href="<?php echo BASE_URL; ?>/nhacungcap_thuonghieu.php" class="menu-item"><i class="fa-solid fa-handshake"></i><span>Nhà cung cấp & thương hiệu</span></a> <a href="<?php echo BASE_URL; ?>/donhang.php" class="menu-item"><i class="fa-solid fa-cart-shopping"></i><span>Quản lý đơn hàng</span></a>
             <a href="<?php echo BASE_URL; ?>/thanhtoan.php" class="menu-item"><i class="fa-solid fa-credit-card"></i><span>Quản lý thanh toán</span></a>
             <a href="<?php echo BASE_URL; ?>/qlnguoidung.php" class="menu-item"><i class="fa-solid fa-users"></i><span>Quản lý tài khoản</span></a>
             <a href="<?php echo BASE_URL; ?>/baiviet.php" class="menu-item"><i class="fa-solid fa-newspaper"></i><span>Bài viết</span></a>
