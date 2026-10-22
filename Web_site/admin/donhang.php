@@ -227,6 +227,8 @@ include("includes/navbar.php");
                                 title: data.message,
                                 showConfirmButton: false,
                                 timer: 1500
+                            }).then(() => {
+                                window.location.reload();
                             });
                         } else {
                             Swal.fire("Lỗi!", data.message, "error");

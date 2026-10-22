@@ -8,7 +8,7 @@ $pageTitle = "Trang chủ - Thống kê";
 if (isset($_SESSION['id'], $_SESSION['user_code'], $_SESSION['email'], $_SESSION['role']) && $_SESSION['role'] === 'admin') {
     $db->confirmlogin($_SESSION['id'], $_SESSION['user_code'], $_SESSION['email'], $_SESSION['role']);
 } else {
-    header('location:index.php');
+    header('location:login.php');
     exit();
 }
 ?>

@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
     $action_type = $_POST['action_type'];
 
     if ($payment_id > 0) {
-        $admin_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : NULL;
+        $admin_id = isset($_SESSION['id']) ? intval($_SESSION['id']) : 0;
 
         //DUYỆT THANH TOÁN 
         if ($action_type === 'approve_payment') {
@@ -157,9 +157,6 @@ include("includes/navbar.php");
                 <h1>Quản Lý Thanh Toán</h1>
                 <p>Theo dõi, kiểm tra lịch sử giao dịch và trạng thái thanh toán đơn hàng</p>
             </div>
-            <a href="<?php echo BASE_URL; ?>/themthanhtoan.php" class="btn-primary" title="Tạo giao dịch thủ công">
-                <i class="fa-solid fa-plus"></i> <span>Tạo giao dịch mới</span>
-            </a>
         </div>
 
         <form method="GET" action="" class="filter-section">

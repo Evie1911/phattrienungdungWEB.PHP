@@ -2,138 +2,363 @@
 require_once '../config.php';
 include("xyly/xuly.php");
 
-$p = new xuly();
-$error_message = "";
+$db = new xuly();
+$pageTitle = "Trang chủ - Thống kê";
 
-if (isset($_POST['nut'])) {
-    switch ($_POST['nut']) {
-        case 'Đăng nhập': {
-                $user = isset($_REQUEST['txtuser']) ? trim($_REQUEST['txtuser']) : '';
-                $pass = isset($_REQUEST['txtpass']) ? trim($_REQUEST['txtpass']) : '';
-                // $user = $_REQUEST['txtuser'];
-                // $pass = $_REQUEST['txtpass'];
-                if ($user != '' && $pass != '') {
-                    $kq = $p->mylogin($user, $pass);
+// THỐNG KÊ TỔNG QUAN 
+$sql_users = "SELECT COUNT(*) AS total FROM users WHERE role = 'customer'";
+$res_users = $db->xuatdulieu($sql_users);
+$total_customers = $res_users[0]['total'] ?? 0;
 
-                    if ($kq == 0) {
-                        $error_message = 'Đăng nhập không thành công. Sai tài khoản (mã/email) hoặc mật khẩu!';
-                    } elseif ($kq == -1) {
-                        $error_message = 'Tài khoản của bạn không có quyền truy cập trang quản trị!';
-                    } elseif ($kq == -2) {
-                        $error_message = 'Tài khoản của bạn hiện đang bị khóa';
-                    }
-                } else {
-                    $error_message = 'Vui lòng nhập đầy đủ tài khoản và mật khẩu.';
-                }
-                break;
-            }
-    }
+$sql_products = "SELECT COUNT(*) AS total FROM products WHERE status = 1";
+$res_products = $db->xuatdulieu($sql_products);
+$total_products = $res_products[0]['total'] ?? 0;
+
+$sql_orders = "SELECT COUNT(*) AS total FROM orders";
+$res_orders = $db->xuatdulieu($sql_orders);
+$total_orders = $res_orders[0]['total'] ?? 0;
+
+$sql_low_stock = "SELECT COUNT(*) AS total FROM products WHERE stock <= 5 AND status = 1";
+$res_low_stock = $db->xuatdulieu($sql_low_stock);
+$total_low_stock = $res_low_stock[0]['total'] ?? 0;
+
+//DANH SÁCH ĐƠN HÀNG VÀ KHÁCH HÀNG GẦN ĐÂY 
+$sql_recent_orders = "SELECT id, order_code, receiver_name, total_amount, order_status FROM orders ORDER BY created_at DESC LIMIT 4";
+$recent_orders = $db->xuatdulieu($sql_recent_orders);
+
+$sql_recent_users = "SELECT id, user_code, full_name, email, phone, birthday, avatar FROM users WHERE role = 'customer' ORDER BY created_at DESC LIMIT 4";
+$recent_users = $db->xuatdulieu($sql_recent_users);
+
+//(Tồn kho sản phẩm theo tháng)
+$sql_import_chart = "
+    SELECT MONTH(created_at) AS thong_thang, SUM(stock) AS tong_sl 
+    FROM products 
+    WHERE YEAR(created_at) = YEAR(CURDATE()) AND status = 1
+    GROUP BY MONTH(created_at) 
+    ORDER BY thong_thang ASC
+";
+$import_data_raw = $db->xuatdulieu($sql_import_chart);
+$import_months = ["Th 1", "Th 2", "Th 3", "Th 4", "Th 5", "Th 6", "Th 7", "Th 8", "Th 9", "Th 10", "Th 11", "Th 12"];
+$import_totals = array_fill(0, 12, 0);
+foreach ($import_data_raw as $item) {
+    $m = (int)$item['thong_thang'];
+    $import_totals[$m - 1] = (int)$item['tong_sl'];
 }
+
+// DỮ LIỆU DOANH THU (Đơn hoàn thành)
+// Theo Tháng
+$sql_month = "SELECT MONTH(created_at) AS m, SUM(total_amount) AS rev FROM orders WHERE YEAR(created_at) = YEAR(CURDATE()) AND order_status = 'Hoàn thành' GROUP BY MONTH(created_at)";
+$data_month = $db->xuatdulieu($sql_month);
+$arr_month_rev = array_fill(0, 12, 0);
+foreach ($data_month as $row) {
+    $arr_month_rev[$row['m'] - 1] = (float)$row['rev'];
+}
+$arr_month_profit = array_map(function ($val) {
+    return $val * 0.15;
+}, $arr_month_rev);
+
+// Theo Quý
+$sql_quarter = "SELECT QUARTER(created_at) AS q, SUM(total_amount) AS rev FROM orders WHERE YEAR(created_at) = YEAR(CURDATE()) AND order_status = 'Hoàn thành' GROUP BY QUARTER(created_at)";
+$data_quarter = $db->xuatdulieu($sql_quarter);
+$arr_quarter_rev = [0, 0, 0, 0];
+foreach ($data_quarter as $row) {
+    $arr_quarter_rev[$row['q'] - 1] = (float)$row['rev'];
+}
+$arr_quarter_profit = array_map(function ($val) {
+    return $val * 0.15;
+}, $arr_quarter_rev);
+
+// Theo Năm
+$sql_year = "SELECT YEAR(created_at) AS y, SUM(total_amount) AS rev FROM orders WHERE order_status = 'Hoàn thành' GROUP BY YEAR(created_at) ORDER BY y ASC";
+$data_year = $db->xuatdulieu($sql_year);
+$arr_year_labels = [];
+$arr_year_rev = [];
+foreach ($data_year as $row) {
+    $arr_year_labels[] = "Năm " . $row['y'];
+    $arr_year_rev[] = (float)$row['rev'];
+}
+if (empty($arr_year_labels)) {
+    $arr_year_labels = [date('Y')];
+    $arr_year_rev = [0];
+}
+$arr_year_profit = array_map(function ($val) {
+    return $val * 0.15;
+}, $arr_year_rev);
+
+include 'includes/header.php';
+include 'includes/sidebar.php';
+include 'includes/navbar.php';
 ?>
-<!DOCTYPE html>
-<html lang="vi">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/data.css">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập hệ thống</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/dangnhap.css">
-</head>
+<main class="main-content" style="margin-top: 20px;">
+    <div class="form-scroll-container dashboard-container">
 
-<body>
+        <div class="dashboard-header">
+            Trang chủ quản trị
+        </div>
 
-    <!-- Radio Controls ẩn để chuyển trạng thái giao diện -->
-    <input type="radio" name="auth_state" id="state-login" class="auth-state-radio" checked>
-    <input type="radio" name="auth_state" id="state-forgot" class="auth-state-radio">
-    <input type="radio" name="auth_state" id="state-otp" class="auth-state-radio">
-
-    <div class="bg-diagonal"></div>
-    <main class="login-container">
-        <div class="login-body">
-            <div class="illustration-col">
-                <img src="https://admin.thuevpsgiare.vn/wp-content/uploads/2025/02/Ung-dung-thuc-te-cua-Clone.png" alt="Hệ thống POS" class="pos-image">
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-title">Tổng khách hàng</div>
+                <div class="stat-value"><?php echo number_format($total_customers); ?> khách hàng</div>
+                <div class="stat-desc">Tổng số khách hàng được quản lý.</div>
             </div>
-
-            <div class="form-col">
-                <!-- 1. GIAO DIỆN ĐĂNG NHẬP -->
-                <div id="loginSection" class="auth-form">
-                    <h1 class="form-title">ĐĂNG NHẬP HỆ THỐNG</h1>
-
-                    <?php if (!empty($error_message)): ?>
-                        <div style="background-color: #fee2e2; color: #dc2626; padding: 10px; border-radius: 6px; font-size: 14px; margin-bottom: 15px; text-align: center; border: 1px solid #fecaca;">
-                            <?php echo $error_message; ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <form id="loginForm" action="" method="POST">
-                        <div class="input-group">
-                            <i class="fa-regular fa-user input-icon"></i>
-                            <input type="text" name="txtuser" id="txtuser" placeholder="Nhập mã nhân viên hoặc Email" required autocomplete="username">
-                        </div>
-                        <div class="input-group">
-                            <i class="fa-solid fa-key input-icon"></i>
-                            <input type="password" name="txtpass" id="txtpass" placeholder="Mật khẩu" required autocomplete="current-password">
-                        </div>
-                        <button type="submit" name="nut" value="Đăng nhập" class="btn-submit">
-                            Đăng nhập
-                        </button>
-                        <div class="forgot-password-wrap">
-                            <label for="state-forgot" id="forgotPasswordLink" style="cursor: pointer;">Bạn quên mật khẩu?</label>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- 2. GIAO DIỆN QUÊN MẬT KHẨU - NHẬP EMAIL -->
-                <div id="forgotSection" class="auth-form">
-                    <h1 class="form-title">QUÊN MẬT KHẨU</h1>
-                    <p style="font-size: 14px; color: #6b7280; margin-bottom: 20px;">Vui lòng nhập Email để nhận mã xác nhận khôi phục mật khẩu.</p>
-                    <form id="forgotForm">
-                        <div class="input-group">
-                            <i class="fa-regular fa-envelope input-icon"></i>
-                            <input type="email" name="email" placeholder="Nhập địa chỉ Email" required>
-                        </div>
-                        <label for="state-otp" class="btn-submit btn-label">
-                            Gửi mã xác nhận
-                        </label>
-                        <div style="text-align: center;">
-                            <label for="state-login" class="back-to-login">
-                                <i class="fa-solid fa-arrow-left"></i> Quay lại Đăng nhập
-                            </label>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- 3. GIAO DIỆN NHẬP MÃ XÁC NHẬN (OTP) -->
-                <div id="otpSection" class="auth-form">
-                    <h1 class="form-title">XÁC NHẬN MÃ OTP</h1>
-                    <p style="font-size: 14px; color: #6b7280;">Nhập mã xác nhận gồm 4 chữ số đã được gửi tới Email của bạn.</p>
-                    <form id="verifyForm">
-                        <div class="code-inputs">
-                            <input type="text" maxlength="1" required>
-                            <input type="text" maxlength="1" required>
-                            <input type="text" maxlength="1" required>
-                            <input type="text" maxlength="1" required>
-                        </div>
-                        <label for="state-login" class="btn-submit btn-label">
-                            Xác nhận
-                        </label>
-                        <div style="text-align: center;">
-                            <label for="state-login" class="back-to-login">
-                                <i class="fa-solid fa-arrow-left"></i> Hủy & Quay lại
-                            </label>
-                        </div>
-                    </form>
-                </div>
-
+            <div class="stat-card dark-blue">
+                <div class="stat-icon"><i class="fa-solid fa-database"></i></div>
+                <div class="stat-title">Tổng sản phẩm</div>
+                <div class="stat-value"><?php echo number_format($total_products); ?> sản phẩm</div>
+                <div class="stat-desc">Tổng số sản phẩm đang kinh doanh.</div>
+            </div>
+            <div class="stat-card yellow">
+                <div class="stat-icon"><i class="fa-solid fa-bag-shopping"></i></div>
+                <div class="stat-title">Tổng đơn hàng</div>
+                <div class="stat-value"><?php echo number_format($total_orders); ?> đơn hàng</div>
+                <div class="stat-desc">Tổng số hóa đơn bán hàng hệ thống.</div>
+            </div>
+            <div class="stat-card red">
+                <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="stat-title">Sắp hết hàng</div>
+                <div class="stat-value"><?php echo number_format($total_low_stock); ?> sản phẩm</div>
+                <div class="stat-desc">Số sản phẩm cảnh báo hết cần nhập thêm.</div>
             </div>
         </div>
-        <footer class="login-footer">
-            <p>Phần mềm quản lý bán hàng &copy; <?php echo date('Y'); ?></p>
-        </footer>
-    </main>
 
-</body>
+        <div class="dashboard-main-grid">
 
-</html>
+            <div class="dashboard-column">
+                <div class="dashboard-box">
+                    <h3 class="dashboard-box-title">Tình trạng đơn hàng gần đây</h3>
+                    <div class="dashboard-table-wrapper">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Mã đơn hàng</th>
+                                    <th>Tên khách hàng</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                if (!empty($recent_orders)) {
+                                    $stt = 1;
+                                    foreach ($recent_orders as $order) {
+                                        // Mặc định màu xám
+                                        $badgeStyle = 'color: #475569; ';
+
+                                        if ($order['order_status'] == 'Chờ xác nhận') {
+                                            $badgeStyle = 'color: #d97706; ';
+                                        } elseif ($order['order_status'] == 'Đã xác nhận') {
+                                            $badgeStyle = 'color: #0284c7; ';
+                                        } elseif ($order['order_status'] == 'Đang đóng gói') {
+                                            $badgeStyle = 'color: #7c3aed; ';
+                                        } elseif ($order['order_status'] == 'Đang giao hàng') {
+                                            $badgeStyle = 'color: #4f46e5; ';
+                                        } elseif ($order['order_status'] == 'Hoàn thành') {
+                                            $badgeStyle = ' color: #16a34a; ';
+                                        } elseif ($order['order_status'] == 'Đã hủy') {
+                                            $badgeStyle = 'color: #dc2626; ';
+                                        }
+
+                                        echo '<tr>
+                                                <td><strong>' . $stt++ . '</strong></td>
+                                                <td><span style="font-weight: 600; color: #0f172a;">' . htmlspecialchars($order['order_code']) . '</span></td>
+                                                <td>' . htmlspecialchars($order['receiver_name']) . '</td>
+                                                <td>' . number_format($order['total_amount'], 0, ',', '.') . ' đ</td>
+                                                <td><span style="' . $badgeStyle . '">' . htmlspecialchars($order['order_status']) . '</span></td>
+                                            </tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan="6" style="text-align: center; padding: 20px;">Chưa có đơn hàng nào.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Khách hàng mới -->
+                <div class="dashboard-box">
+                    <h3 class="dashboard-box-title">Khách hàng mới</h3>
+                    <div class="dashboard-table-wrapper">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Mã TK</th>
+                                    <th>Tên khách hàng</th>
+                                    <th>Số điện thoại</th>
+                                    <th>Ngày sinh</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                if (!empty($recent_users)) {
+                                    $stt = 1;
+                                    foreach ($recent_users as $user) {
+                                        $birthday = $user['birthday'] ? date('d/m/Y', strtotime($user['birthday'])) : 'Chưa cập nhật';
+
+                                        echo '<tr>
+                                            <td><strong>' . $stt++ . '</strong></td>
+                                            <td><span style="font-weight: 500;">' . htmlspecialchars($user['user_code']) . '</span></td>
+                                            <td><span style="font-weight: 600; color: #0f172a;">' . htmlspecialchars($user['full_name']) . '</span></td>
+                                            <td>' . htmlspecialchars($user['phone']) . '</td>
+                                            <td>' . $birthday . '</td>
+                                        </tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan="6" style="text-align: center; padding: 20px;">Chưa có khách hàng nào.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: Biểu đồ -->
+            <div class="dashboard-column">
+                <div class="dashboard-box">
+                    <h3 class="dashboard-box-title" style="margin-bottom: 15px;">Thống kê tồn kho sản phẩm theo tháng</h3>
+                    <div class="chart-container">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="dashboard-box">
+                    <div class="dashboard-box-title" style="margin-bottom: 15px;">
+                        <span>Thống kê doanh thu (Đơn thành công)</span>
+                        <select id="revenueFilter" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
+                            <option value="month">Theo Tháng</option>
+                            <option value="quarter">Theo Quý</option>
+                            <option value="year">Theo Năm</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // 1. Dữ liệu biểu đồ đường (Tồn kho)
+        const importLabels = <?php echo json_encode($import_months); ?>;
+        const importDataValues = <?php echo json_encode($import_totals); ?>;
+
+        const ctxLine = document.getElementById("lineChart");
+        if (ctxLine) {
+            new Chart(ctxLine, {
+                type: "line",
+                data: {
+                    labels: importLabels,
+                    datasets: [{
+                        label: "Tổng tồn kho sản phẩm",
+                        data: importDataValues,
+                        borderColor: "#0284c7",
+                        backgroundColor: "rgba(2, 132, 199, 0.1)",
+                        fill: true,
+                        tension: 0.4,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "top",
+                            align: "end"
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                },
+            });
+        }
+
+        //Dữ liệu biểu đồ cột (Doanh thu theo Tháng, Quý, Năm)
+        const revenueData = {
+            month: {
+                labels: ["Th 1", "Th 2", "Th 3", "Th 4", "Th 5", "Th 6", "Th 7", "Th 8", "Th 9", "Th 10", "Th 11", "Th 12"],
+                revenue: <?php echo json_encode($arr_month_rev); ?>,
+                profit: <?php echo json_encode($arr_month_profit); ?>
+            },
+            quarter: {
+                labels: ["Quý 1", "Quý 2", "Quý 3", "Quý 4"],
+                revenue: <?php echo json_encode($arr_quarter_rev); ?>,
+                profit: <?php echo json_encode($arr_quarter_profit); ?>
+            },
+            year: {
+                labels: <?php echo json_encode($arr_year_labels); ?>,
+                revenue: <?php echo json_encode($arr_year_rev); ?>,
+                profit: <?php echo json_encode($arr_year_profit); ?>
+            }
+        };
+
+        const ctxBar = document.getElementById("barChart");
+        if (ctxBar) {
+            let barChart = new Chart(ctxBar, {
+                type: "bar",
+                data: {
+                    labels: revenueData.month.labels,
+                    datasets: [{
+                            label: "Doanh thu (VNĐ)",
+                            data: revenueData.month.revenue,
+                            backgroundColor: "#eab308",
+                            borderRadius: 4,
+                        },
+                        {
+                            label: "Lợi nhuận ước tính (VNĐ)",
+                            data: revenueData.month.profit,
+                            backgroundColor: "#0284c7",
+                            borderRadius: 4,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: "top",
+                            align: "end"
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                },
+            });
+
+            const filterSelect = document.getElementById("revenueFilter");
+            if (filterSelect) {
+                filterSelect.addEventListener("change", function() {
+                    const selectedType = this.value;
+                    const currentDataset = revenueData[selectedType];
+
+                    barChart.data.labels = currentDataset.labels;
+                    barChart.data.datasets[0].data = currentDataset.revenue;
+                    barChart.data.datasets[1].data = currentDataset.profit;
+                    barChart.update();
+                });
+            }
+        }
+    });
+</script>
+
+<?php
+include 'includes/footer.php';
+?>

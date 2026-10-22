@@ -11,11 +11,10 @@
           <div class="nav-right">
               <!-- Khu vực thông tin người dùng đang đăng nhập -->
               <div class="user-profile">
-                  <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                      alt="Avatar người dùng" class="user-avatar">
+                  <img src="<?php echo htmlspecialchars(!empty($_SESSION['avatar']) && file_exists('../uploads/avatar/' . $_SESSION['avatar']) ? '../uploads/avatar/' . $_SESSION['avatar'] : '../uploads/avatar/null.jpg'); ?>" alt="Avatar người dùng" class="user-avatar">
                   <div class="user-info">
-                      <span class="user-name">Nguyễn Văn Admin</span>
-                      <span class="user-role">Quản trị viên</span>
+                      <span class="user-name"><?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
+                      <span class="user-role">TK <?php echo htmlspecialchars($_SESSION['role']); ?></span>
                   </div>
               </div>
           </div>
