@@ -141,7 +141,7 @@ include("includes/navbar.php");
                                     <div class="customer-name"><?php echo htmlspecialchars($ord['receiver_name']); ?></div>
                                     <div class="customer-phone"><?php echo htmlspecialchars($ord['phone']); ?></div>
                                 </td>
-                                <td><?php echo htmlspecialchars($ord['first_product_name']); ?> <?php echo ($ord['total_qty'] > 1) ? '... và sản phẩm khác' : ''; ?></td>
+                                <td><?php echo htmlspecialchars($ord['first_product_name']); ?> <?php echo ($ord['total_qty'] > 1) ? '...và sản phẩm' : ''; ?></td>
                                 <td><?php echo intval($ord['total_qty']); ?></td>
                                 <td><strong><?php echo number_format($ord['total_amount'], 0, ',', '.'); ?> đ</strong></td>
                                 <td>
@@ -150,7 +150,7 @@ include("includes/navbar.php");
                                     // Kiểm tra nếu đơn hàng đã kết thúc (Hoàn thành hoặc Đã hủy)
                                     $is_finished = ($current_status === 'Hoàn thành' || $current_status === 'Đã hủy');
                                     ?>
-                                    <select class="product-input status-select" data-id="<?php echo $ord['id']; ?>" <?php echo $is_finished ? 'disabled style="background-color: #f1f5f9; cursor: not-allowed;"' : ''; ?>>
+                                    <select  class="product-input status-select" data-id="<?php echo $ord['id']; ?>" <?php echo $is_finished ? 'disabled style="background-color: #f1f5f9; cursor: not-allowed;"' : ''; ?>>
                                         <?php
                                         $statuses = [
                                             'Chờ xác nhận' => 1,
