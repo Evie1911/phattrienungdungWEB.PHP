@@ -5,7 +5,9 @@ include("xyly/xuly.php");
 $db = new xuly();
 $pageTitle = "Trang chủ - Thống kê";
 
+
 // THỐNG KÊ TỔNG QUAN 
+
 $sql_users = "SELECT COUNT(*) AS total FROM users WHERE role = 'customer'";
 $res_users = $db->xuatdulieu($sql_users);
 $total_customers = $res_users[0]['total'] ?? 0;
@@ -22,14 +24,18 @@ $sql_low_stock = "SELECT COUNT(*) AS total FROM products WHERE stock <= 5 AND st
 $res_low_stock = $db->xuatdulieu($sql_low_stock);
 $total_low_stock = $res_low_stock[0]['total'] ?? 0;
 
-//DANH SÁCH ĐƠN HÀNG VÀ KHÁCH HÀNG GẦN ĐÂY 
+
+// DANH SÁCH ĐƠN HÀNG VÀ KHÁCH HÀNG GẦN ĐÂY 
+
 $sql_recent_orders = "SELECT id, order_code, receiver_name, total_amount, order_status FROM orders ORDER BY created_at DESC LIMIT 4";
 $recent_orders = $db->xuatdulieu($sql_recent_orders);
 
 $sql_recent_users = "SELECT id, user_code, full_name, email, phone, birthday, avatar FROM users WHERE role = 'customer' ORDER BY created_at DESC LIMIT 4";
 $recent_users = $db->xuatdulieu($sql_recent_users);
 
-//(Tồn kho sản phẩm theo tháng)
+
+// TỒN KHO SẢN PHẨM THEO THÁNG
+
 $sql_import_chart = "
     SELECT MONTH(created_at) AS thong_thang, SUM(stock) AS tong_sl 
     FROM products 
@@ -45,7 +51,9 @@ foreach ($import_data_raw as $item) {
     $import_totals[$m - 1] = (int)$item['tong_sl'];
 }
 
+
 // DỮ LIỆU DOANH THU (Đơn hoàn thành)
+
 // Theo Tháng
 $sql_month = "SELECT MONTH(created_at) AS m, SUM(total_amount) AS rev FROM orders WHERE YEAR(created_at) = YEAR(CURDATE()) AND order_status = 'Hoàn thành' GROUP BY MONTH(created_at)";
 $data_month = $db->xuatdulieu($sql_month);
@@ -53,9 +61,6 @@ $arr_month_rev = array_fill(0, 12, 0);
 foreach ($data_month as $row) {
     $arr_month_rev[$row['m'] - 1] = (float)$row['rev'];
 }
-$arr_month_profit = array_map(function ($val) {
-    return $val * 0.15;
-}, $arr_month_rev);
 
 // Theo Quý
 $sql_quarter = "SELECT QUARTER(created_at) AS q, SUM(total_amount) AS rev FROM orders WHERE YEAR(created_at) = YEAR(CURDATE()) AND order_status = 'Hoàn thành' GROUP BY QUARTER(created_at)";
@@ -64,9 +69,6 @@ $arr_quarter_rev = [0, 0, 0, 0];
 foreach ($data_quarter as $row) {
     $arr_quarter_rev[$row['q'] - 1] = (float)$row['rev'];
 }
-$arr_quarter_profit = array_map(function ($val) {
-    return $val * 0.15;
-}, $arr_quarter_rev);
 
 // Theo Năm
 $sql_year = "SELECT YEAR(created_at) AS y, SUM(total_amount) AS rev FROM orders WHERE order_status = 'Hoàn thành' GROUP BY YEAR(created_at) ORDER BY y ASC";
@@ -81,9 +83,58 @@ if (empty($arr_year_labels)) {
     $arr_year_labels = [date('Y')];
     $arr_year_rev = [0];
 }
-$arr_year_profit = array_map(function ($val) {
-    return $val * 0.15;
-}, $arr_year_rev);
+
+
+// DỮ LIỆU SỐ LƯỢNG SẢN PHẨM BÁN RA (Đơn hoàn thành)
+
+// Theo Tháng
+$sql_qty_month = "
+    SELECT MONTH(o.created_at) AS m, SUM(od.quantity) AS total_qty 
+    FROM orders o 
+    JOIN order_items od ON o.id = od.order_id 
+    WHERE YEAR(o.created_at) = YEAR(CURDATE()) AND o.order_status = 'Hoàn thành' 
+    GROUP BY MONTH(o.created_at)
+";
+$data_qty_month = $db->xuatdulieu($sql_qty_month);
+$arr_month_qty = array_fill(0, 12, 0);
+foreach ($data_qty_month as $row) {
+    $arr_month_qty[$row['m'] - 1] = (int)$row['total_qty'];
+}
+
+// Theo Quý
+$sql_qty_quarter = "
+    SELECT QUARTER(o.created_at) AS q, SUM(od.quantity) AS total_qty 
+    FROM orders o 
+    JOIN order_items od ON o.id = od.order_id 
+    WHERE YEAR(o.created_at) = YEAR(CURDATE()) AND o.order_status = 'Hoàn thành' 
+    GROUP BY QUARTER(o.created_at)
+";
+$data_qty_quarter = $db->xuatdulieu($sql_qty_quarter);
+$arr_quarter_qty = [0, 0, 0, 0];
+foreach ($data_qty_quarter as $row) {
+    $arr_quarter_qty[$row['q'] - 1] = (int)$row['total_qty'];
+}
+
+// Theo Năm
+$sql_qty_year = "
+    SELECT YEAR(o.created_at) AS y, SUM(od.quantity) AS total_qty 
+    FROM orders o 
+    JOIN order_items od ON o.id = od.order_id 
+    WHERE o.order_status = 'Hoàn thành' 
+    GROUP BY YEAR(o.created_at) 
+    ORDER BY y ASC
+";
+$data_qty_year = $db->xuatdulieu($sql_qty_year);
+$arr_year_qty_labels = [];
+$arr_year_qty_values = [];
+foreach ($data_qty_year as $row) {
+    $arr_year_qty_labels[] = "Năm " . $row['y'];
+    $arr_year_qty_values[] = (int)$row['total_qty'];
+}
+if (empty($arr_year_qty_labels)) {
+    $arr_year_qty_labels = [date('Y')];
+    $arr_year_qty_values = [0];
+}
 
 include 'includes/header.php';
 include 'includes/sidebar.php';
@@ -146,7 +197,6 @@ include 'includes/navbar.php';
                                 if (!empty($recent_orders)) {
                                     $stt = 1;
                                     foreach ($recent_orders as $order) {
-                                        // Mặc định màu xám
                                         $badgeStyle = 'color: #475569; ';
 
                                         if ($order['order_status'] == 'Chờ xác nhận') {
@@ -172,7 +222,7 @@ include 'includes/navbar.php';
                                             </tr>';
                                     }
                                 } else {
-                                    echo '<tr><td colspan="6" style="text-align: center; padding: 20px;">Chưa có đơn hàng nào.</td></tr>';
+                                    echo '<tr><td colspan="5" style="text-align: center; padding: 20px;">Chưa có đơn hàng nào.</td></tr>';
                                 }
                                 ?>
                             </tbody>
@@ -202,15 +252,15 @@ include 'includes/navbar.php';
                                         $birthday = $user['birthday'] ? date('d/m/Y', strtotime($user['birthday'])) : 'Chưa cập nhật';
 
                                         echo '<tr>
-                                            <td><strong>' . $stt++ . '</strong></td>
-                                            <td><span style="font-weight: 500;">' . htmlspecialchars($user['user_code']) . '</span></td>
-                                            <td><span style="font-weight: 600; color: #0f172a;">' . htmlspecialchars($user['full_name']) . '</span></td>
-                                            <td>' . htmlspecialchars($user['phone']) . '</td>
-                                            <td>' . $birthday . '</td>
-                                        </tr>';
+                                                <td><strong>' . $stt++ . '</strong></td>
+                                                <td><span style="font-weight: 500;">' . htmlspecialchars($user['user_code']) . '</span></td>
+                                                <td><span style="font-weight: 600; color: #0f172a;">' . htmlspecialchars($user['full_name']) . '</span></td>
+                                                <td>' . htmlspecialchars($user['phone']) . '</td>
+                                                <td>' . $birthday . '</td>
+                                            </tr>';
                                     }
                                 } else {
-                                    echo '<tr><td colspan="6" style="text-align: center; padding: 20px;">Chưa có khách hàng nào.</td></tr>';
+                                    echo '<tr><td colspan="5" style="text-align: center; padding: 20px;">Chưa có khách hàng nào.</td></tr>';
                                 }
                                 ?>
                             </tbody>
@@ -228,17 +278,18 @@ include 'includes/navbar.php';
                     </div>
                 </div>
 
+                <!-- Biểu đồ kết hợp Doanh thu & Số lượng sản phẩm bán ra -->
                 <div class="dashboard-box">
                     <div class="dashboard-box-title" style="margin-bottom: 15px;">
-                        <span>Thống kê doanh thu (Đơn thành công)</span>
-                        <select id="revenueFilter" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
+                        <span>Thống kê doanh thu & Số lượng bán ra (Đơn thành công)</span>
+                        <select id="combinedFilter" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
                             <option value="month">Theo Tháng</option>
                             <option value="quarter">Theo Quý</option>
                             <option value="year">Theo Năm</option>
                         </select>
                     </div>
                     <div class="chart-container">
-                        <canvas id="barChart"></canvas>
+                        <canvas id="combinedChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -287,44 +338,46 @@ include 'includes/navbar.php';
             });
         }
 
-        //Dữ liệu biểu đồ cột (Doanh thu theo Tháng, Quý, Năm)
-        const revenueData = {
+        // 2. Dữ liệu biểu đồ kết hợp (Doanh thu & Số lượng)
+        const combinedData = {
             month: {
                 labels: ["Th 1", "Th 2", "Th 3", "Th 4", "Th 5", "Th 6", "Th 7", "Th 8", "Th 9", "Th 10", "Th 11", "Th 12"],
                 revenue: <?php echo json_encode($arr_month_rev); ?>,
-                profit: <?php echo json_encode($arr_month_profit); ?>
+                quantity: <?php echo json_encode($arr_month_qty); ?>,
             },
             quarter: {
                 labels: ["Quý 1", "Quý 2", "Quý 3", "Quý 4"],
                 revenue: <?php echo json_encode($arr_quarter_rev); ?>,
-                profit: <?php echo json_encode($arr_quarter_profit); ?>
+                quantity: <?php echo json_encode($arr_quarter_qty); ?>,
             },
             year: {
                 labels: <?php echo json_encode($arr_year_labels); ?>,
                 revenue: <?php echo json_encode($arr_year_rev); ?>,
-                profit: <?php echo json_encode($arr_year_profit); ?>
+                quantity: <?php echo json_encode($arr_year_qty_values); ?>,
             }
         };
 
-        const ctxBar = document.getElementById("barChart");
-        if (ctxBar) {
-            let barChart = new Chart(ctxBar, {
+        const ctxCombined = document.getElementById("combinedChart");
+        if (ctxCombined) {
+            let combinedChart = new Chart(ctxCombined, {
                 type: "bar",
                 data: {
-                    labels: revenueData.month.labels,
+                    labels: combinedData.month.labels,
                     datasets: [{
                             label: "Doanh thu (VNĐ)",
-                            data: revenueData.month.revenue,
+                            data: combinedData.month.revenue,
                             backgroundColor: "#eab308",
                             borderRadius: 4,
+                            yAxisID: 'y', // Trục Y bên trái
                         },
                         {
-                            label: "Lợi nhuận ước tính (VNĐ)",
-                            data: revenueData.month.profit,
-                            backgroundColor: "#0284c7",
+                            label: "Số lượng sản phẩm",
+                            data: combinedData.month.quantity,
+                            backgroundColor: "#3b82f6",
                             borderRadius: 4,
-                        },
-                    ],
+                            yAxisID: 'y1', // Trục Y bên phải
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
@@ -337,22 +390,45 @@ include 'includes/navbar.php';
                     },
                     scales: {
                         y: {
-                            beginAtZero: true
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Doanh thu (VNĐ)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: false // Không hiển thị đè lưới lên trục bên trái
+                            },
+                            title: {
+                                display: true,
+                                text: 'Số lượng sản phẩm'
+                            },
+                            ticks: {
+                                precision: 0 // Đảm bảo số lượng là số nguyên
+                            }
                         }
                     },
                 },
             });
 
-            const filterSelect = document.getElementById("revenueFilter");
+            const filterSelect = document.getElementById("combinedFilter");
             if (filterSelect) {
                 filterSelect.addEventListener("change", function() {
                     const selectedType = this.value;
-                    const currentDataset = revenueData[selectedType];
+                    const currentDataset = combinedData[selectedType];
 
-                    barChart.data.labels = currentDataset.labels;
-                    barChart.data.datasets[0].data = currentDataset.revenue;
-                    barChart.data.datasets[1].data = currentDataset.profit;
-                    barChart.update();
+                    combinedChart.data.labels = currentDataset.labels;
+                    combinedChart.data.datasets[0].data = currentDataset.revenue;
+                    combinedChart.data.datasets[1].data = currentDataset.quantity;
+                    combinedChart.update();
                 });
             }
         }
