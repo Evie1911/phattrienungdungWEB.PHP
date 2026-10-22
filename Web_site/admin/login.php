@@ -16,7 +16,7 @@ if (isset($_POST['nut'])) {
                     $kq = $p->mylogin($user, $pass);
 
                     if ($kq == 0) {
-                        $error_message = 'Đăng nhập không thành công. Sai tài khoản (mã/email) hoặc mật khẩu!';
+                        $error_message = 'Đăng nhập không thành công. Sai tài khoản email hoặc mật khẩu!';
                     } elseif ($kq == -1) {
                         $error_message = 'Tài khoản của bạn không có quyền truy cập trang quản trị!';
                     } elseif ($kq == -2) {
