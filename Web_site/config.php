@@ -20,8 +20,7 @@ $basePath = rtrim($scriptDir, '/');
 define('BASE_URL', rtrim($configuredBaseUrl !== '' ? $configuredBaseUrl : ($protocol . '://' . $host . $basePath), '/'));
 define('ROOT_PATH', __DIR__);
 
-// Đọc giá trị trong môi trường trước, sau đó mới đọc file .env ở thư mục gốc dự án.
-// Không ghi đè biến môi trường thật bằng giá trị trong file .env.
+// Đọc biến môi trường trước, sau đó dùng file bí mật riêng trên hosting hoặc .env local.
 function project_env(string $name, string $default = ''): string
 {
     $value = getenv($name);
@@ -32,8 +31,18 @@ function project_env(string $name, string $default = ''): string
     static $envValues = null;
     if ($envValues === null) {
         $envValues = [];
-        // Đọc .env từ thư mục cha của document root để thông tin bí mật không
-        // thể bị tải xuống trực tiếp khi ứng dụng không dùng .htaccess.
+
+        // InfinityFree giới hạn PHP trong htdocs, vì vậy thông tin hosting nằm
+        // trong file PHP này. File được bỏ qua khi deploy và không commit lên Git.
+        $secretsFile = __DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'hosting-secrets.php';
+        if (is_file($secretsFile) && is_readable($secretsFile)) {
+            $secrets = require $secretsFile;
+            if (is_array($secrets)) {
+                $envValues = $secrets;
+            }
+        }
+
+        // .env chỉ phục vụ local. Không đặt file này trong thư mục public trên hosting.
         $envFiles = [dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env'];
         foreach ($envFiles as $envFile) {
             if (!is_readable($envFile)) {
