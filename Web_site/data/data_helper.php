@@ -305,6 +305,8 @@ class DataHelper extends csdltmdt
         }
 
         $success = ($params['vnp_ResponseCode'] ?? '') === '00' && ($params['vnp_TransactionStatus'] ?? '') === '00';
+        // VNPay response code 24 means the customer cancelled the transaction.
+        $cancelled = ($params['vnp_ResponseCode'] ?? '') === '24';
         $db = $this->db();
         $db->begin_transaction();
         try {
@@ -344,12 +346,21 @@ class DataHelper extends csdltmdt
                 $paymentStatus = 'Thành công';
             } else {
                 if (!$alreadyPaid) {
-                    $stmt = $db->prepare("UPDATE orders SET payment_status='Thất bại' WHERE id=? AND order_status<>'Đã hủy'");
-                    $stmt->bind_param('i', $dbOrderId);
+                    $failedStatus = "Th\u{1EA5}t b\u{1EA1}i";
+                    $cancelledStatus = "\u{0110}\u{00E3} h\u{1EE7}y";
+                    if ($cancelled) {
+                        $stmt = $db->prepare('UPDATE orders SET payment_status=?, order_status=? WHERE id=?');
+                        $stmt->bind_param('ssi', $cancelledStatus, $cancelledStatus, $dbOrderId);
+                    } else {
+                        $stmt = $db->prepare('UPDATE orders SET payment_status=? WHERE id=? AND order_status<>?');
+                        $stmt->bind_param('sis', $failedStatus, $dbOrderId, $cancelledStatus);
+                    }
                     $stmt->execute();
                     $stmt->close();
                 }
-                $paymentStatus = $alreadyPaid ? 'Thành công' : 'Thất bại';
+                $paymentStatus = $alreadyPaid
+                    ? "Th\u{00E0}nh c\u{00F4}ng"
+                    : ($cancelled ? "\u{0110}\u{00E3} h\u{1EE7}y" : "Th\u{1EA5}t b\u{1EA1}i");
             }
 
             $stmt = $db->prepare("UPDATE payments SET status=?, reference_code=COALESCE(NULLIF(?,''),reference_code), confirmed_at=IF(?='Thành công',NOW(),confirmed_at) WHERE id=?");
@@ -383,8 +394,14 @@ class DataHelper extends csdltmdt
     {
         $db=$this->db(); $stmt=$db->prepare('SELECT * FROM orders WHERE order_code=? LIMIT 1'); $stmt->bind_param('s',$id); $stmt->execute(); $r=$stmt->get_result()->fetch_assoc(); $stmt->close();
         if (!$r) return null;
+        $paidStatus = "\u{0110}\u{00E3} thanh to\u{00E1}n";
+        $failedStatus = "Th\u{1EA5}t b\u{1EA1}i";
+        $cancelledStatus = "\u{0110}\u{00E3} h\u{1EE7}y";
+        $mappedPaymentStatus = $r['payment_status'] === $paidStatus
+            ? 'paid'
+            : ($r['payment_status'] === $failedStatus ? 'failed' : ($r['payment_status'] === $cancelledStatus ? 'cancelled' : 'unpaid'));
         $order=['id'=>$r['order_code'],'customer_name'=>$r['receiver_name'],'customer_phone'=>$r['phone'],'customer_email'=>$r['email'],'customer_address'=>$r['address'],'note'=>$r['note'],
-            'total_amount'=>(float)$r['total_amount'],'payment_method'=>$r['payment_method']==='COD'?'cod':'online','payment_status'=>$r['payment_status']==='Đã thanh toán'?'paid':($r['payment_status']==='Thất bại'?'failed':'unpaid'),'order_status'=>$r['order_status'],'created_at'=>$r['created_at'],'items'=>[]];
+            'total_amount'=>(float)$r['total_amount'],'payment_method'=>$r['payment_method']==='COD'?'cod':'online','payment_status'=>$mappedPaymentStatus,'order_status'=>$r['order_status'],'created_at'=>$r['created_at'],'items'=>[]];
         $oid=(int)$r['id']; $stmt=$db->prepare('SELECT product_id,product_name,color,storage,unit_price AS price,quantity,unit_price*quantity AS subtotal FROM order_items WHERE order_id=?');
         $stmt->bind_param('i',$oid); $stmt->execute(); $order['items']=$stmt->get_result()->fetch_all(MYSQLI_ASSOC); $stmt->close(); return $order;
     }

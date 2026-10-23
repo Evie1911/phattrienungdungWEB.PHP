@@ -18,11 +18,20 @@ if (!$order) {
     redirect('index.php');
 }
 
-if ($order['payment_status'] === 'paid') {
-    set_flash('success', 'Thanh toán VNPay thành công.');
-} elseif (($_GET['vnp_ResponseCode'] ?? '') === '00' && ($_GET['vnp_TransactionStatus'] ?? '') === '00') {
-    set_flash('success', 'VNPay đã nhận giao dịch. Cửa hàng đang chờ thông báo xác nhận thanh toán.');
+// ReturnUrl is signed by VNPay. Record it as well as IPN so cancelled
+// transactions are persisted even when VNPay does not send a separate IPN.
+$result = record_vnpay_result($_GET);
+if (empty($result['valid'])) {
+    error_log('VNPay return could not record transaction result.');
+    set_flash("error", "Kh\u{00F4}ng th\u{1EC3} c\u{1EAD}p nh\u{1EAD}t k\u{1EBF}t qu\u{1EA3} giao d\u{1ECB}ch. Vui l\u{00F2}ng li\u{00EAn h\u{1EC7} c\u{1EED}a h\u{00E0}ng ki\u{1EC3}m tra.");
+    redirect('order-success.php?order_id=' . urlencode($order['id']));
+}
+
+if (!empty($result['paid'])) {
+    set_flash("success", "Thanh to\u{00E1}n VNPay th\u{00E0}nh c\u{00F4}ng.");
+} elseif (($_GET['vnp_ResponseCode'] ?? '') === '24') {
+    set_flash("error", "B\u{1EA1}n \u{0111}\u{00E3} h\u{1EE7}y giao d\u{1ECB}ch VNPay. \u{0110}\u{01A1}n h\u{00E0}ng \u{0111}\u{00E3} \u{0111}\u{01B0}\u{1EE3}c h\u{1EE7}y.");
 } else {
-    set_flash('error', 'Thanh toán VNPay chưa thành công. Bạn có thể thử thanh toán lại từ trang đơn hàng.');
+    set_flash("error", "Giao d\u{1ECB}ch VNPay th\u{1EA5}t b\u{1EA1}i. \u{0110}\u{01A1}n h\u{00E0}ng ch\u{01B0}a \u{0111}\u{01B0}\u{1EE3}c thanh to\u{00E1}n.");
 }
 redirect('order-success.php?order_id=' . urlencode($order['id']));

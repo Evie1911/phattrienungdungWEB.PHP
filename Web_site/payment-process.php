@@ -37,7 +37,7 @@ try {
         'vnp_TmnCode' => VNPAY_TMN_CODE,
         'vnp_Amount' => $payment['amount'] * 100,
         'vnp_CurrCode' => 'VND',
-        'vnp_TxnRef' => $payment['txn_ref'],
+        'vnp_TxnRef' => $payment['order_code'],
         'vnp_OrderInfo' => 'Thanh toan don hang ' . $payment['order_code'],
         'vnp_OrderType' => 'other',
         'vnp_Locale' => 'vn',
