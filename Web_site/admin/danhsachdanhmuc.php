@@ -60,7 +60,7 @@ include("includes/navbar.php");
                 <h1>Quản Lý Danh Mục</h1>
                 <p>Thêm mới, cập nhật và quản lý hình ảnh, thông tin danh mục</p>
             </div>
-            <a href="<?php echo BASE_URL; ?>/themdanhmuc.php" class="btn-primary" title="Thêm danh mục mới">
+            <a href="<?php echo BASE_URL; ?>/admin/themdanhmuc.php" class="btn-primary" title="Thêm danh mục mới">
                 <i class="fa-solid fa-plus"></i> <span>Thêm danh mục mới</span>
             </a>
         </div>
@@ -108,7 +108,7 @@ include("includes/navbar.php");
                                     <td>' . $productCount . '</td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="' . BASE_URL . '/capnhatdm.php?id=' . $row['id'] . '" class="btn-action btn-edit" title="Chỉnh sửa">
+                                            <a href="' . BASE_URL . '/admin/capnhatdm.php?id=' . $row['id'] . '" class="btn-action btn-edit" title="Chỉnh sửa">
                                                 <i class="fa-regular fa-pen-to-square"></i>
                                             </a>
                                             <button type="button" class="btn-action btn-delete nutxoa" title="Xóa" data-id="' . $row['id'] . '" data-name="' . htmlspecialchars($row['name']) . '">

@@ -76,7 +76,7 @@ include("includes/navbar.php");
                 <h1>Quản Lý Tài Khoản</h1>
                 <p>Phân quyền, quản lý tài khoản và trạng thái hoạt động</p>
             </div>
-            <a href="<?php echo BASE_URL; ?>/addnguoidung.php" class="btn-primary" title="Thêm người dùng mới">
+            <a href="<?php echo BASE_URL; ?>/admin/addnguoidung.php" class="btn-primary" title="Thêm người dùng mới">
                 <i class="fa-solid fa-plus"></i> <span>Tạo tài khoản Admin</span>
             </a>
         </div>

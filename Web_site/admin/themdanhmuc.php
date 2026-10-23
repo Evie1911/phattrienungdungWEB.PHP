@@ -98,7 +98,7 @@ include("includes/navbar.php");
                 <h1>Tạo mới danh mục</h1>
             </div>
             <div class="product-breadcrumb">
-                <a href="<?php echo BASE_URL; ?>/danhsachdanhmuc.php">Danh Sách Danh Mục</a> / <span>Thêm Danh Mục</span>
+                <a href="<?php echo BASE_URL; ?>/admin/danhsachdanhmuc.php">Danh Sách Danh Mục</a> / <span>Thêm Danh Mục</span>
             </div>
         </div>
 
@@ -132,9 +132,9 @@ include("includes/navbar.php");
 
             <div class="product-form-actions">
                 <button type="submit" class="btn-submit-save">Lưu lại</button>
-                <a href="<?php echo BASE_URL; ?>/danhsachdanhmuc.php" class="btn-submit-cancel nutHuy"
+                <a href="<?php echo BASE_URL; ?>/admin/danhsachdanhmuc.php" class="btn-submit-cancel nutHuy"
                     data-type="danh mục"
-                    data-redirect="<?php echo BASE_URL; ?>/danhsachdanhmuc.php">
+                    data-redirect="<?php echo BASE_URL; ?>/admin/danhsachdanhmuc.php">
                     Hủy bỏ
                 </a>
             </div>
