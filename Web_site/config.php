@@ -32,12 +32,9 @@ function project_env(string $name, string $default = ''): string
     static $envValues = null;
     if ($envValues === null) {
         $envValues = [];
-        // Trên hosting, .env nằm trong document root và bị chặn truy cập bởi .htaccess.
-        // Ở môi trường local, dùng file .env tại thư mục gốc repository làm phương án dự phòng.
-        $envFiles = [
-            __DIR__ . DIRECTORY_SEPARATOR . '.env',
-            dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env',
-        ];
+        // Đọc .env từ thư mục cha của document root để thông tin bí mật không
+        // thể bị tải xuống trực tiếp khi ứng dụng không dùng .htaccess.
+        $envFiles = [dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env'];
         foreach ($envFiles as $envFile) {
             if (!is_readable($envFile)) {
                 continue;
@@ -68,7 +65,7 @@ function project_env(string $name, string $default = ''): string
 define('VNPAY_URL', project_env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'));
 define('VNPAY_TMN_CODE', project_env('VNPAY_TMN_CODE'));
 define('VNPAY_HASH_SECRET', project_env('VNPAY_HASH_SECRET'));
-define('VNPAY_RETURN_URL', project_env('VNPAY_RETURN_URL', BASE_URL . '/vnpay_return.html'));
+define('VNPAY_RETURN_URL', project_env('VNPAY_RETURN_URL', BASE_URL . '/vnpay_return.php'));
 define('VNPAY_IPN_URL', project_env('VNPAY_IPN_URL', ''));
 
 // Hàm định dạng tiền tệ VNĐ

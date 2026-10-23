@@ -18,7 +18,7 @@ Các secret phải nằm trong Environment tên `production`, vì job deploy kha
 
 ## File cấu hình ứng dụng
 
-Workflow không tải `.env` lên hosting. Tạo file `.env` thủ công trong thư mục đích website (thường `/htdocs/.env`), cùng cấp với `config.php`. `.htaccess` chặn truy cập HTTP trực tiếp tới file này, còn PHP đọc file để lấy cấu hình. Không commit file này lên Git.
+Workflow không tải `.env` lên hosting. Tạo file `.env` thủ công ở thư mục cha của `htdocs` (không đặt bên trong thư mục public `htdocs`); PHP sẽ đọc file ở thư mục này. Không commit file này lên Git.
 
 Điền `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, `VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET`, `VNPAY_RETURN_URL` và `VNPAY_IPN_URL` theo thông tin production. Return URL và IPN URL cần là HTTPS công khai; khai báo IPN URL tương ứng trong cấu hình merchant VNPay. Nếu đã từng đẩy thông tin database lên repository, hãy đổi mật khẩu database/account trên InfinityFree rồi cập nhật `.env` trên hosting và máy local.
 

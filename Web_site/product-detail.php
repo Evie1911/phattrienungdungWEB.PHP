@@ -23,13 +23,6 @@ if (!$product) {
 }
 
 // Chuẩn hóa cả URL cũ có query string về URL sản phẩm dạng slug-id.html.
-$canonicalProductPath = slugify($product['name']) . '-' . (int)$product['id'] . '.html';
-$requestedPath = basename((string)parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH));
-if ($requestedPath !== $canonicalProductPath) {
-    header('Location: ' . BASE_URL . '/' . $canonicalProductPath, true, 301);
-    exit;
-}
-
 $page_title = $product['name'];
 require_once __DIR__ . '/includes/header.php';
 

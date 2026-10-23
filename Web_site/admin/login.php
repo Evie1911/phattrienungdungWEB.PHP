@@ -39,7 +39,7 @@ if (isset($_POST['nut'])) {
     <title>Đăng nhập hệ thống</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/dangnhap.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/admin/assets/css/dangnhap.css">
 </head>
 
 <body>

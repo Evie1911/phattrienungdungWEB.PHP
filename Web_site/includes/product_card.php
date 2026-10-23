@@ -1,7 +1,7 @@
 <?php
 // Component Thẻ sản phẩm tái sử dụng - Tinh gọn (5 SP/dòng PC, 2 SP/dòng Mobile)
 if (isset($product)):
-    $product_url = BASE_URL . '/' . slugify($product['name']) . '-' . (int)$product['id'] . '.html';
+    $product_url = BASE_URL . '/product-detail.php?id=' . (int)$product['id'];
     $has_sale = !empty($product['sale_price']) && $product['sale_price'] < $product['price'];
     $current_price = $has_sale ? $product['sale_price'] : $product['price'];
     $discount_percent = $has_sale ? round((($product['price'] - $product['sale_price']) / $product['price']) * 100) : 0;
