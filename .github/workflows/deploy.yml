@@ -78,6 +78,10 @@ jobs:
             /*) ;;
             *) echo '::error::FTP_SERVER_DIR must begin with /, for example /htdocs/.'; exit 1 ;;
           esac
+          case "$FTP_SERVER_DIR" in
+            */) ;;
+            *) echo '::error::FTP_SERVER_DIR must end with /, for example /htdocs/.'; exit 1 ;;
+          esac
 
       - name: Upload website files over FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
