@@ -46,7 +46,7 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
 
                 <div style="margin-bottom: 30px; border-radius: var(--radius-md); overflow: hidden; height: 400px;">
-                    <img src="<?php echo get_image_src($single_article['image'], $single_article['title'], 800, 400); ?>" style="width:100%; height:100%; object-fit:cover;" alt="<?php echo sanitize($single_article['title']); ?>">
+                    <img src="<?php echo get_image_src($single_article['thumbnail'], $single_article['title'], 'baiviet', 800, 400); ?>" style="width:100%; height:100%; object-fit:cover;" alt="<?php echo sanitize($single_article['title']); ?>">
                 </div>
 
                 <div style="font-size: 1.05rem; line-height: 1.8; color: var(--text-primary); margin-bottom: 30px;">
@@ -73,10 +73,10 @@ require_once __DIR__ . '/includes/header.php';
                 <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 4px;">Cập nhật xu hướng smartphone, mẹo sử dụng và đánh giá sản phẩm mới nhất.</p>
             </div>
 
-            <form action="<?php echo BASE_URL; ?>/news.php" method="GET" style="display:flex; gap:8px;">
+            <!-- <form action="<?php echo BASE_URL; ?>/news.php" method="GET" style="display:flex; gap:8px;">
                 <input type="text" name="search" class="form-control" placeholder="Tìm bài viết..." value="<?php echo sanitize($search); ?>" style="width:240px; padding:8px 14px;">
                 <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i></button>
-            </form>
+            </form> -->
         </div>
 
         <?php if (!empty($articles)): ?>
@@ -84,15 +84,15 @@ require_once __DIR__ . '/includes/header.php';
                 <?php foreach ($articles as $article): ?>
                     <div class="article-card">
                         <div class="article-thumb">
-                            <img src="<?php echo get_image_src($article['image'], $article['title']); ?>" alt="<?php echo sanitize($article['title']); ?>">
+                            <img src="<?php echo get_image_src($article['thumbnail'], $article['title'], 'baiviet'); ?>" alt="<?php echo sanitize($article['title']); ?>">
                         </div>
                         <div class="article-body">
-                            <div class="article-date"><i class="far fa-calendar-alt"></i> <?php echo date('d/m/Y', strtotime($article['created_at'])); ?></div>
+                            <div class="article-date"><i class="far fa-calendar-alt"></i> <?php echo date('d/m/Y', strtotime($article['published_at'])); ?></div>
                             <h2 class="article-title"><?php echo sanitize($article['title']); ?></h2>
                             <p class="article-summary"><?php echo sanitize($article['summary']); ?></p>
-                            <a href="<?php echo BASE_URL; ?>/news.php?id=<?php echo $article['id']; ?>" class="btn btn-outline btn-sm" style="margin-top:auto; align-self: flex-start;">
+                            <!-- <a href="<?php echo BASE_URL; ?>/news.php?id=<?php echo $article['id']; ?>" class="btn btn-outline btn-sm" style="margin-top:auto; align-self: flex-start;">
                                 Đọc bài viết <i class="fas fa-arrow-right"></i>
-                            </a>
+                            </a> -->
                         </div>
                     </div>
                 <?php endforeach; ?>

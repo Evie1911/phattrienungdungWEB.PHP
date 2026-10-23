@@ -81,14 +81,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <li class="nav-item <?php echo $current_page === 'news.php' ? 'active' : ''; ?>">
                         <a href="<?php echo BASE_URL; ?>/news.php"><i class="fas fa-newspaper"></i> Tin tức & Bài viết</a>
                     </li>
-                    <li class="nav-item <?php echo $current_page === 'about.php' ? 'active' : ''; ?>">
+                    <!-- <li class="nav-item <?php echo $current_page === 'about.php' ? 'active' : ''; ?>">
                         <a href="<?php echo BASE_URL; ?>/about.php"><i class="fas fa-info-circle"></i> Giới thiệu</a>
-                    </li>
+                    </li> -->
                 </ul>
 
-                <div class="nav-contact">
+                <!-- <div class="nav-contact">
                     <i class="fas fa-headset"></i> Hotline: 1900.6868
-                </div>
+                </div> -->
             </div>
         </nav>
     </header>

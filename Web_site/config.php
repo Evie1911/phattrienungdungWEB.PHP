@@ -7,14 +7,60 @@ if (session_status() === PHP_SESSION_NONE) {
 // Chế độ mô phỏng Session
 define('DEMO_MODE', true);
 
-// Định nghĩa BASE_URL và ROOT_PATH cho dự án
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
+// Định nghĩa BASE_URL theo APP_URL nếu cấu hình; nếu không, dùng host hiện tại.
+$configuredBaseUrl = project_env('APP_URL');
+$forwardedProtocol = strtolower(trim(explode(',', (string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''))[0]));
+$protocol = in_array($forwardedProtocol, ['http', 'https'], true)
+    ? $forwardedProtocol
+    : ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http');
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
 $basePath = rtrim($scriptDir, '/');
 
-define('BASE_URL', $protocol . '://' . $host . $basePath);
+define('BASE_URL', rtrim($configuredBaseUrl !== '' ? $configuredBaseUrl : ($protocol . '://' . $host . $basePath), '/'));
 define('ROOT_PATH', __DIR__);
+
+// Đọc giá trị trong môi trường trước, sau đó mới đọc file .env ở thư mục gốc dự án.
+// Không ghi đè biến môi trường thật bằng giá trị trong file .env.
+function project_env(string $name, string $default = ''): string
+{
+    $value = getenv($name);
+    if ($value !== false && $value !== '') {
+        return trim($value);
+    }
+
+    static $envValues = null;
+    if ($envValues === null) {
+        $envValues = [];
+        $envFile = dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env';
+        if (is_readable($envFile)) {
+            foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+                $line = trim($line);
+                if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) {
+                    continue;
+                }
+                [$key, $envValue] = explode('=', $line, 2);
+                $key = trim($key);
+                $envValue = trim($envValue);
+                if (strlen($envValue) >= 2 && (($envValue[0] === '"' && str_ends_with($envValue, '"')) || ($envValue[0] === "'" && str_ends_with($envValue, "'")))) {
+                    $envValue = substr($envValue, 1, -1);
+                }
+                if ($key !== '') {
+                    $envValues[$key] = $envValue;
+                }
+            }
+        }
+    }
+
+    return $envValues[$name] ?? $default;
+}
+
+// VNPay Sandbox: các mã kết nối phải lấy từ file .env, không commit lên mã nguồn.
+define('VNPAY_URL', project_env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'));
+define('VNPAY_TMN_CODE', project_env('VNPAY_TMN_CODE'));
+define('VNPAY_HASH_SECRET', project_env('VNPAY_HASH_SECRET'));
+define('VNPAY_RETURN_URL', project_env('VNPAY_RETURN_URL', BASE_URL . '/vnpay_return.php'));
+define('VNPAY_IPN_URL', project_env('VNPAY_IPN_URL', ''));
 
 // Hàm định dạng tiền tệ VNĐ
 function format_currency($amount) {

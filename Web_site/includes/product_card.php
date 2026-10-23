@@ -16,7 +16,7 @@ if (isset($product)):
     </div>
 
     <a href="<?php echo BASE_URL; ?>/product-detail.php?id=<?php echo $product['id']; ?>" class="product-thumb" title="<?php echo sanitize($product['name']); ?>">
-        <img src="<?php echo get_image_src($product['image'], $product['name'], 200, 200); ?>" alt="<?php echo sanitize($product['name']); ?>">
+        <img src="<?php echo get_image_src($product['image'], $product['name'], 'imagesanpham', 200, 200); ?>" alt="<?php echo sanitize($product['name']); ?>">
     </a>
 
     <div class="product-info">

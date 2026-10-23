@@ -56,7 +56,7 @@ $related_products = array_slice($related_products, 0, 4);
     <div class="detail-wrapper">
         <div class="detail-gallery">
             <div class="main-image-box">
-                <img src="<?php echo get_image_src($product['image'], $product['name'], 500, 500); ?>" alt="<?php echo sanitize($product['name']); ?>">
+                <img src="<?php echo get_image_src($product['image'], $product['name'], 'imagesanpham', 500, 500); ?>" alt="<?php echo sanitize($product['name']); ?>">
             </div>
         </div>
 

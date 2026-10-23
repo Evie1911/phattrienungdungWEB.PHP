@@ -50,9 +50,9 @@ $articles_preview = array_slice($articles, 0, 4);
                 <a href="<?php echo BASE_URL; ?>/products.php" class="btn btn-primary btn-lg">
                     <i class="fas fa-shopping-cart"></i> Khám Phá Ngay
                 </a>
-                <a href="<?php echo BASE_URL; ?>/about.php" class="btn btn-secondary btn-lg" style="margin-left: 8px;">
+                <!-- <a href="<?php echo BASE_URL; ?>/about.php" class="btn btn-secondary btn-lg" style="margin-left: 8px;">
                     Tìm hiểu thêm
-                </a>
+                </a> -->
             </div>
         </div>
     </section>
@@ -93,15 +93,15 @@ $articles_preview = array_slice($articles, 0, 4);
             <?php foreach ($articles_preview as $article): ?>
                 <div class="article-card">
                     <div class="article-thumb">
-                        <img src="<?php echo get_image_src($article['image'], $article['title']); ?>" alt="<?php echo sanitize($article['title']); ?>">
+                        <img src="<?php echo get_image_src($article['thumbnail'], $article['title']); ?>" alt="<?php echo sanitize($article['title']); ?>">
                     </div>
                     <div class="article-body">
-                        <div class="article-date"><i class="far fa-calendar-alt"></i> <?php echo date('d/m/Y', strtotime($article['created_at'])); ?></div>
+                        <div class="article-date"><i class="far fa-calendar-alt"></i> <?php echo date('d/m/Y', strtotime($article['published_at'])); ?></div>
                         <h3 class="article-title"><?php echo sanitize($article['title']); ?></h3>
                         <p class="article-summary"><?php echo sanitize($article['summary']); ?></p>
-                        <a href="<?php echo BASE_URL; ?>/news.php?id=<?php echo $article['id']; ?>" class="btn btn-outline btn-sm" style="margin-top:auto; align-self: flex-start;">
+                        <!-- <a href="<?php echo BASE_URL; ?>/news.php?id=<?php echo $article['id']; ?>" class="btn btn-outline btn-sm" style="margin-top:auto; align-self: flex-start;">
                             Đọc chi tiết
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             <?php endforeach; ?>

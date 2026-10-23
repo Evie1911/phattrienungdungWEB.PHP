@@ -40,14 +40,22 @@ require_once __DIR__ . '/includes/header.php';
                     <strong>Phương thức:</strong> <?php echo $order['payment_method'] === 'online' ? 'Thanh toán Trực tuyến' : 'Thanh toán khi nhận hàng (COD)'; ?><br>
                     <strong>Trạng thái thanh toán:</strong> 
                     <span class="badge badge-<?php echo $order['payment_status'] === 'paid' ? 'completed' : 'pending'; ?>">
-                        <?php echo $order['payment_status'] === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'; ?>
+                        <?php echo $order['payment_status'] === 'paid' ? 'Đã thanh toán' : ($order['payment_status'] === 'failed' ? 'Thanh toán thất bại' : 'Chưa thanh toán'); ?>
                     </span><br>
+                    <?php if ($order['payment_method'] === 'online' && $order['payment_status'] === 'unpaid'): ?>
+                        <span style="color:var(--text-secondary);">Đang chờ VNPay xác nhận giao dịch.</span><br>
+                    <?php endif; ?>
                     <strong>Tổng tiền:</strong> <strong style="color: var(--accent-red); font-size: 1.05rem;"><?php echo format_currency($order['total_amount']); ?></strong>
                 </p>
             </div>
         </div>
 
         <div style="text-align: center;">
+            <?php if ($order['payment_method'] === 'online' && $order['payment_status'] === 'failed'): ?>
+                <a href="<?php echo BASE_URL; ?>/payment-process.php?order_id=<?php echo urlencode($order['id']); ?>" class="btn btn-primary btn-lg" style="margin-right: 8px;">
+                    <i class="fas fa-credit-card"></i> Thử thanh toán VNPay lại
+                </a>
+            <?php endif; ?>
             <a href="<?php echo BASE_URL; ?>/index.php" class="btn btn-primary btn-lg">
                 <i class="fas fa-shopping-bag"></i> Tiếp tục mua sắm
             </a>

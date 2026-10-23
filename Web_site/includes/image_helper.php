@@ -1,10 +1,10 @@
 <?php
 // Helper render ảnh với Fallback SVG mượt mà khi chưa có tệp ảnh tĩnh PNG/JPG
 
-function get_image_src($image_path, $alt_text = 'IT Mobile', $width = 400, $height = 400, $bg_color = '0066cc') {
-    $full_path = ROOT_PATH . '/' . ltrim($image_path, '/');
+function get_image_src($image_path, $alt_text = 'IT Mobile', $folder = 'baiviet', $width = 400, $height = 400, $bg_color = '0066cc') {
+    $full_path = ROOT_PATH . '/uploads/' . $folder . '/' . ltrim($image_path, '/');
     if (!empty($image_path) && file_exists($full_path)) {
-        return BASE_URL . '/' . ltrim($image_path, '/');
+        return BASE_URL . '/uploads/' . $folder . '/' . ltrim($image_path, '/');
     }
 
     // Tự động tạo chuỗi SVG Data URI sắc nét với tên IT Mobile

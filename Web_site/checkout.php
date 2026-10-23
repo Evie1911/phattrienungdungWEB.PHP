@@ -121,8 +121,8 @@ require_once __DIR__ . '/includes/header.php';
                     <label style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 2px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer;">
                         <input type="radio" name="payment_method" value="online" <?php echo $form_data['payment_method'] === 'online' ? 'checked' : ''; ?>>
                         <div>
-                            <strong><i class="fas fa-globe text-primary"></i> Thanh toán trực tuyến (Mô phỏng Sandbox)</strong>
-                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Mô phỏng thanh toán qua Thẻ ATM, VNPay hoặc QR Code.</div>
+                            <strong><i class="fas fa-globe text-primary"></i> Thanh toán trực tuyến qua VNPay</strong>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Thanh toán an toàn qua cổng VNPay Sandbox.</div>
                         </div>
                     </label>
                 </div>
