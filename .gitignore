@@ -2,4 +2,3 @@
 .env
 .env.*
 !.env.example
-# Web_site/config/hosting-secrets.php
