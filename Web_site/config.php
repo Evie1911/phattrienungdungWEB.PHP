@@ -32,8 +32,16 @@ function project_env(string $name, string $default = ''): string
     static $envValues = null;
     if ($envValues === null) {
         $envValues = [];
-        $envFile = dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env';
-        if (is_readable($envFile)) {
+        // Trên hosting, .env nằm trong document root và bị chặn truy cập bởi .htaccess.
+        // Ở môi trường local, dùng file .env tại thư mục gốc repository làm phương án dự phòng.
+        $envFiles = [
+            __DIR__ . DIRECTORY_SEPARATOR . '.env',
+            dirname(__DIR__) . DIRECTORY_SEPARATOR . '.env',
+        ];
+        foreach ($envFiles as $envFile) {
+            if (!is_readable($envFile)) {
+                continue;
+            }
             foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
                 $line = trim($line);
                 if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) {
@@ -49,6 +57,7 @@ function project_env(string $name, string $default = ''): string
                     $envValues[$key] = $envValue;
                 }
             }
+            break;
         }
     }
 
@@ -59,7 +68,7 @@ function project_env(string $name, string $default = ''): string
 define('VNPAY_URL', project_env('VNPAY_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'));
 define('VNPAY_TMN_CODE', project_env('VNPAY_TMN_CODE'));
 define('VNPAY_HASH_SECRET', project_env('VNPAY_HASH_SECRET'));
-define('VNPAY_RETURN_URL', project_env('VNPAY_RETURN_URL', BASE_URL . '/vnpay_return.php'));
+define('VNPAY_RETURN_URL', project_env('VNPAY_RETURN_URL', BASE_URL . '/vnpay_return.html'));
 define('VNPAY_IPN_URL', project_env('VNPAY_IPN_URL', ''));
 
 // Hàm định dạng tiền tệ VNĐ
@@ -70,6 +79,20 @@ function format_currency($amount) {
 // Hàm làm sạch dữ liệu (XSS)
 function sanitize($data) {
     return htmlspecialchars(trim((string)$data), ENT_QUOTES, 'UTF-8');
+}
+
+// Chuyển tên thành slug ASCII để tạo URL sản phẩm dạng ten-san-pham-123.html.
+function slugify($value) {
+    $value = trim((string)$value);
+    if (function_exists('iconv')) {
+        $ascii = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value);
+        if ($ascii !== false) {
+            $value = $ascii;
+        }
+    }
+    $value = strtolower($value);
+    $value = preg_replace('/[^a-z0-9]+/', '-', $value);
+    return trim((string)$value, '-') ?: 'san-pham';
 }
 
 // Hàm chuyển hướng trang

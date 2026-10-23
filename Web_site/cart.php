@@ -113,7 +113,7 @@ $cart_totals = calculate_cart_totals();
                                     <tr class="cart-item-row" data-item-key="<?php echo $key; ?>" data-unit-price="<?php echo $unit_price; ?>">
                                         <td>
                                             <div class="cart-product-info">
-                                                <img src="<?php echo get_image_src($item['image'], $item['name'], 60, 60); ?>" alt="<?php echo sanitize($item['name']); ?>">
+                                                <img src="<?php echo get_image_src($item['image'], $item['name'],'imagesanpham', 60, 60); ?>" alt="<?php echo sanitize($item['name']); ?>">
                                                 <div>
                                                     <a href="<?php echo BASE_URL; ?>/product-detail.php?id=<?php echo $item['product_id']; ?>" style="font-weight: 600; color: var(--text-primary);">
                                                         <?php echo sanitize($item['name']); ?>

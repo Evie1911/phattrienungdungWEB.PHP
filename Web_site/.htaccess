@@ -1,0 +1,29 @@
+Options -Indexes
+
+<FilesMatch "^\.env(?:\..*)?$">
+    Require all denied
+</FilesMatch>
+
+RewriteEngine On
+
+# The rules work both at the domain root on InfinityFree and from the project
+# subdirectory under XAMPP's htdocs; Apache calculates the per-directory base.
+
+# Dua trang chu ve URL .html, tao URL path tu request hien tai de XAMPP
+# khong chuyen duong dan Windows (C:/...) thanh mot phan cua URL.
+RewriteRule ^$ %{REQUEST_URI}index.html [R=302,L,NE]
+
+# URL chi tiet san pham: ten-san-pham-123.html -> product-detail.php?id=123
+RewriteCond %{REQUEST_URI} ^(.*/)
+RewriteRule ^([a-z0-9]+(?:-[a-z0-9]+)*)-([0-9]+)\.html$ %1product-detail.php?id=$2 [NC,L,QSA]
+
+# Alias cac trang PHP thanh URL .html, bao gom ca cac trang trong admin.
+RewriteCond %{REQUEST_URI} ^(.+)\.html$ [NC]
+RewriteRule ^([a-z0-9/_-]+)\.html$ %1.php [NC,L,QSA]
+
+# Chuyen URL .php duoc mo truc tiep sang .html, chi ap dung cho GET/HEAD.
+# Form POST va cac callback POST (nhu VNPay IPN) van vao PHP truc tiep.
+RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$
+RewriteCond %{THE_REQUEST} \s/+[^?\ ]+\.php(?:[?\ ]|$) [NC]
+RewriteCond %{REQUEST_URI} ^(.+)\.php$ [NC]
+RewriteRule ^(.+)\.php$ %1.html [R=302,L,NE]

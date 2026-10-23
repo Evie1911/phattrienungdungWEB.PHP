@@ -143,7 +143,7 @@ require_once __DIR__ . '/includes/header.php';
                 <div style="max-height: 320px; overflow-y: auto; margin-bottom: 16px;">
                     <?php foreach ($cart_items as $item): ?>
                         <div style="display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-color);">
-                            <img src="<?php echo get_image_src($item['image'], $item['name'], 50, 50); ?>" style="width:50px; height:50px; object-fit:contain;" alt="">
+                            <img src="<?php echo get_image_src($item['image'], $item['name'],'imagesanpham', 50, 50); ?>" style="width:50px; height:50px; object-fit:contain;" alt="">
                             <div style="flex:1;">
                                 <div style="font-weight: 600; font-size:0.9rem;"><?php echo sanitize($item['name']); ?></div>
                                 <div style="font-size:0.8rem; color:var(--text-muted);">

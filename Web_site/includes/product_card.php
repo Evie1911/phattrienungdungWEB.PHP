@@ -1,6 +1,7 @@
 <?php
 // Component Thẻ sản phẩm tái sử dụng - Tinh gọn (5 SP/dòng PC, 2 SP/dòng Mobile)
 if (isset($product)):
+    $product_url = BASE_URL . '/' . slugify($product['name']) . '-' . (int)$product['id'] . '.html';
     $has_sale = !empty($product['sale_price']) && $product['sale_price'] < $product['price'];
     $current_price = $has_sale ? $product['sale_price'] : $product['price'];
     $discount_percent = $has_sale ? round((($product['price'] - $product['sale_price']) / $product['price']) * 100) : 0;
@@ -15,14 +16,14 @@ if (isset($product)):
         <?php endif; ?>
     </div>
 
-    <a href="<?php echo BASE_URL; ?>/product-detail.php?id=<?php echo $product['id']; ?>" class="product-thumb" title="<?php echo sanitize($product['name']); ?>">
+    <a href="<?php echo sanitize($product_url); ?>" class="product-thumb" title="<?php echo sanitize($product['name']); ?>">
         <img src="<?php echo get_image_src($product['image'], $product['name'], 'imagesanpham', 200, 200); ?>" alt="<?php echo sanitize($product['name']); ?>">
     </a>
 
     <div class="product-info">
         <span class="product-brand"><?php echo sanitize($product['brand']); ?></span>
         <h3 class="product-name">
-            <a href="<?php echo BASE_URL; ?>/product-detail.php?id=<?php echo $product['id']; ?>" style="color:inherit;">
+            <a href="<?php echo sanitize($product_url); ?>" style="color:inherit;">
                 <?php echo sanitize($product['name']); ?>
             </a>
         </h3>
@@ -35,7 +36,7 @@ if (isset($product)):
         </div>
 
         <div class="product-actions">
-            <a href="<?php echo BASE_URL; ?>/product-detail.php?id=<?php echo $product['id']; ?>" class="btn btn-secondary btn-sm" title="Xem chi tiết">
+            <a href="<?php echo sanitize($product_url); ?>" class="btn btn-secondary btn-sm" title="Xem chi tiết">
                 Chi tiết
             </a>
             <a href="<?php echo BASE_URL; ?>/cart.php?action=add&id=<?php echo $product['id']; ?>" class="btn btn-primary btn-sm" title="Thêm vào giỏ">
