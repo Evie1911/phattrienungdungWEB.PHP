@@ -1,13 +1,14 @@
 -- =====================================================
 -- DATABASE: IT MOBILE (phiên bản đầy đủ: Website + Trang quản trị Admin)
--- Đồ án sinh viên | MySQL / MariaDB (XAMPP) | utf8mb4
--- Cách dùng: phpMyAdmin -> Import (file này đã tự DROP/CREATE database)
+-- Import note: chon database da tao san trong phpMyAdmin; file nay chi tao bang va du lieu.
 -- Mật khẩu của TẤT CẢ tài khoản mẫu: password
 -- =====================================================
 
-DROP DATABASE IF EXISTS it_mobile;
-CREATE DATABASE it_mobile CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE it_mobile;
+-- DROP DATABASE IF EXISTS it_mobile;
+-- CREATE DATABASE it_mobile CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- USE it_mobile;
+
+SET NAMES utf8mb4;
 
 -- =====================================================
 -- PHẦN 1: CẤU TRÚC BẢNG
@@ -26,7 +27,7 @@ CREATE TABLE users (
     role        ENUM('admin','customer') NOT NULL DEFAULT 'customer',   -- Quyền hạn
     status      ENUM('active','locked')  NOT NULL DEFAULT 'active',     -- Hoạt động / Khóa
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 2. NHÀ CUNG CẤP (ô "Nhà cung cấp" trong form sản phẩm)
 CREATE TABLE suppliers (
@@ -35,7 +36,7 @@ CREATE TABLE suppliers (
     phone    VARCHAR(15),
     email    VARCHAR(100),
     address  VARCHAR(255)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3. DANH MỤC (2 cấp: nhóm menu website -> danh mục con quản lý trong Admin)
 --    Cấp 1 (parent_id NULL): Điện thoại, Máy tính bảng, Phụ kiện, Laptop
@@ -52,13 +53,13 @@ CREATE TABLE categories (
     sort_order     INT DEFAULT 0,
     status         TINYINT(1) DEFAULT 1,
     FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 4. THƯƠNG HIỆU (bộ lọc "Thương hiệu" ở website)
 CREATE TABLE brands (
     id    INT AUTO_INCREMENT PRIMARY KEY,
     name  VARCHAR(100) NOT NULL UNIQUE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 5. SẢN PHẨM
 CREATE TABLE products (
@@ -73,7 +74,7 @@ CREATE TABLE products (
     sale_price     DECIMAL(12,0) DEFAULT NULL,           -- Giá giảm (NULL = không giảm)
     cost_price     DECIMAL(12,0) DEFAULT 0,              -- Giá nhập (để tính lợi nhuận)
     stock          INT NOT NULL DEFAULT 0,               -- Số lượng tồn
-    condition_text VARCHAR(50) DEFAULT 'Mới 100%',       -- Tình trạng máy
+    condition_text VARCHAR(50) NOT NULL DEFAULT 'Mới 100%',       -- Tình trạng máy
     image          VARCHAR(255),
     is_new         TINYINT(1) DEFAULT 0,                 -- nhãn "MỚI"
     is_featured    TINYINT(1) DEFAULT 0,                 -- "Sản phẩm nổi bật"
@@ -86,14 +87,14 @@ CREATE TABLE products (
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL,
     INDEX idx_price (price),
     INDEX idx_name (name)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE product_colors (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     product_id  INT NOT NULL,
     color_name  VARCHAR(50) NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE product_storages (
     id          INT AUTO_INCREMENT PRIMARY KEY,
@@ -101,7 +102,7 @@ CREATE TABLE product_storages (
     storage     VARCHAR(50) NOT NULL,
     extra_price DECIMAL(12,0) DEFAULT 0,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE product_specs (
     id          INT AUTO_INCREMENT PRIMARY KEY,
@@ -110,7 +111,7 @@ CREATE TABLE product_specs (
     spec_value  VARCHAR(255) NOT NULL,
     sort_order  INT DEFAULT 0,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 6. NHẬP KHO (lịch sử nhập hàng từ nhà cung cấp, làm số liệu "đầu vào")
 CREATE TABLE stock_imports (
@@ -123,14 +124,14 @@ CREATE TABLE stock_imports (
     note         VARCHAR(255),
     FOREIGN KEY (product_id)  REFERENCES products(id),
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 7. BÀI VIẾT (Quản lý bài viết + nút "Thêm danh mục bài viết")
 CREATE TABLE news_categories (
     id    INT AUTO_INCREMENT PRIMARY KEY,
     name  VARCHAR(100) NOT NULL UNIQUE,
     slug  VARCHAR(100) NOT NULL UNIQUE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE articles (
     id            INT AUTO_INCREMENT PRIMARY KEY,
@@ -146,7 +147,7 @@ CREATE TABLE articles (
     is_visible    TINYINT(1) DEFAULT 1,                  -- Hiển thị (Công khai) / Ẩn
     published_at  DATETIME,                              -- Ngày đăng
     FOREIGN KEY (category_id) REFERENCES news_categories(id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 8. ĐƠN HÀNG (giỏ hàng lưu bằng $_SESSION của PHP nên không có bảng riêng)
 CREATE TABLE orders (
@@ -170,7 +171,7 @@ CREATE TABLE orders (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_order_status (order_status),
     INDEX idx_created (created_at)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE order_items (
     id            INT AUTO_INCREMENT PRIMARY KEY,
@@ -184,7 +185,7 @@ CREATE TABLE order_items (
     quantity      INT NOT NULL DEFAULT 1,
     FOREIGN KEY (order_id)   REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Lịch sử đổi trạng thái đơn hàng (tự ghi bằng trigger)
 CREATE TABLE order_status_history (
@@ -194,7 +195,7 @@ CREATE TABLE order_status_history (
     new_status  VARCHAR(30) NOT NULL,
     changed_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 9. THANH TOÁN (Quản lý thanh toán: PAY-9825, COD, chuyển khoản, VNPay QR)
 CREATE TABLE payments (
@@ -212,7 +213,7 @@ CREATE TABLE payments (
     confirmed_by   INT DEFAULT NULL,                     -- admin duyệt
     FOREIGN KEY (order_id)     REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (confirmed_by) REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Yêu cầu hoàn tiền (popup "Yêu Cầu Hoàn Tiền": số tiền + lý do bắt buộc)
 CREATE TABLE refunds (
@@ -224,14 +225,14 @@ CREATE TABLE refunds (
     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (payment_id)   REFERENCES payments(id) ON DELETE CASCADE,
     FOREIGN KEY (requested_by) REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 10. CÀI ĐẶT HỆ THỐNG (menu "Cài đặt hệ thống" + thông tin footer website)
 CREATE TABLE settings (
     setting_key    VARCHAR(50) PRIMARY KEY,
     setting_value  VARCHAR(255) NOT NULL,
     description    VARCHAR(255)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 11. NHẬT KÝ HOẠT ĐỘNG CỦA ADMIN
 CREATE TABLE admin_logs (
@@ -241,7 +242,7 @@ CREATE TABLE admin_logs (
     target      VARCHAR(100),                            -- vd: TK-04, PAY-9824
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
 -- PHẦN 2: DỮ LIỆU MẪU
@@ -452,181 +453,14 @@ INSERT INTO admin_logs (user_id, action, target) VALUES
 (1, 'Cập nhật bài viết', 'BV-101');
 
 -- =====================================================
--- PHẦN 3: VIEW (dùng trực tiếp trong PHP cho từng trang)
--- =====================================================
+-- InfinityFree Free khong cho phep tao VIEW, PROCEDURE hoac TRIGGER.
+-- Cac truy van tong hop va nghiep vu nay can duoc xu ly trong PHP.
 
--- Trang website + Admin "Quản lý sản phẩm": giá cuối, % giảm, trạng thái kho
--- (Còn hàng: >10, Sắp hết: 1-10, Hết hàng: 0)
-CREATE VIEW v_products AS
-SELECT p.id, p.sku, p.name, p.description, p.price, p.sale_price,
-       COALESCE(p.sale_price, p.price) AS final_price,
-       IF(p.sale_price IS NOT NULL AND p.price > p.sale_price,
-          ROUND((p.price - p.sale_price) / p.price * 100), 0) AS discount_percent,
-       p.cost_price, p.stock, p.condition_text, p.image,
-       p.is_new, p.is_featured, p.is_bestseller, p.status,
-       CASE WHEN p.stock = 0 THEN 'Hết hàng'
-            WHEN p.stock <= 10 THEN 'Sắp hết'
-            ELSE 'Còn hàng' END AS stock_status,
-       c.id AS category_id, c.name AS category_name,
-       COALESCE(pc.name, c.name) AS group_name,
-       COALESCE(pc.slug, c.slug) AS group_slug,
-       b.name AS brand_name, s.name AS supplier_name
-FROM products p
-JOIN categories c      ON p.category_id = c.id
-LEFT JOIN categories pc ON c.parent_id = pc.id
-JOIN brands b          ON p.brand_id = b.id
-LEFT JOIN suppliers s  ON p.supplier_id = s.id;
-
--- Admin "Quản lý người dùng": có cột Số đơn hàng
-CREATE VIEW v_users_admin AS
-SELECT u.id, u.user_code, u.avatar, u.full_name, u.email, u.phone, u.birthday,
-       u.role, u.status, u.created_at,
-       COUNT(o.id) AS order_count
-FROM users u
-LEFT JOIN orders o ON o.user_id = u.id
-GROUP BY u.id;
-
--- Admin "Quản lý danh mục": có cột Số lượng sản phẩm
-CREATE VIEW v_categories_admin AS
-SELECT c.id, c.category_code, c.image, c.name, c.description,
-       pc.name AS parent_name, c.status,
-       COUNT(p.id) AS product_count
-FROM categories c
-LEFT JOIN categories pc ON c.parent_id = pc.id
-LEFT JOIN products p    ON p.category_id = c.id
-GROUP BY c.id;
-
--- Admin "Quản lý đơn hàng": tên sản phẩm gộp + tổng số lượng
-CREATE VIEW v_orders_admin AS
-SELECT o.id, o.order_code, o.receiver_name, o.phone, o.address,
-       GROUP_CONCAT(oi.product_name SEPARATOR ', ') AS products_summary,
-       SUM(oi.quantity) AS total_quantity,
-       o.total_amount, o.payment_method, o.payment_status, o.order_status, o.created_at
-FROM orders o
-JOIN order_items oi ON oi.order_id = o.id
-GROUP BY o.id;
-
--- Admin "Quản lý thanh toán": danh sách giao dịch
-CREATE VIEW v_payments_admin AS
-SELECT pay.id, pay.payment_code, o.order_code, o.receiver_name, o.phone,
-       pay.method, pay.amount, pay.status, pay.reference_code, pay.note, pay.created_at
-FROM payments pay
-JOIN orders o ON o.id = pay.order_id;
-
--- 4 thẻ thống kê đầu trang "Quản lý thanh toán"
-CREATE VIEW v_payment_stats AS
-SELECT
-  (SELECT COALESCE(SUM(amount),0) FROM payments WHERE status = 'Thành công')           AS total_revenue,
-  (SELECT COUNT(*) FROM payments WHERE status = 'Thành công')                          AS success_count,
-  (SELECT COUNT(*) FROM payments WHERE status = 'Chờ xác nhận')                        AS pending_count,
-  (SELECT COUNT(*) FROM payments WHERE status = 'COD - Chờ thu tiền')                  AS cod_waiting_count;
-
--- 4 thẻ thống kê "Bảng điều khiển"
-CREATE VIEW v_dashboard_stats AS
-SELECT
-  (SELECT COUNT(*) FROM users    WHERE role = 'customer')              AS total_customers,
-  (SELECT COUNT(*) FROM products WHERE status = 1)                     AS total_products,
-  (SELECT COUNT(*) FROM orders)                                        AS total_orders,
-  (SELECT COUNT(*) FROM products WHERE stock BETWEEN 1 AND 10)         AS low_stock_products;
-
--- Biểu đồ "Thống kê doanh thu" (doanh thu + lợi nhuận theo tháng, bỏ đơn hủy)
-CREATE VIEW v_monthly_revenue AS
-SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS month,
-       SUM(oi.unit_price * oi.quantity)                    AS revenue,
-       SUM((oi.unit_price - oi.cost_price) * oi.quantity)  AS profit
-FROM orders o
-JOIN order_items oi ON oi.order_id = o.id
-WHERE o.payment_status = 'Đã thanh toán' AND o.order_status <> 'Đã hủy'
-GROUP BY DATE_FORMAT(o.created_at, '%Y-%m');
-
--- Biểu đồ nhập kho theo tháng
-CREATE VIEW v_monthly_imports AS
-SELECT DATE_FORMAT(imported_at, '%Y-%m') AS month,
-       SUM(quantity) AS total_quantity,
-       SUM(quantity * import_price) AS total_cost
-FROM stock_imports
-GROUP BY DATE_FORMAT(imported_at, '%Y-%m');
-
--- =====================================================
--- PHẦN 4: STORED PROCEDURE (các popup trong trang thanh toán)
--- =====================================================
-DELIMITER $$
-
--- Popup "Xác nhận duyệt chuyển khoản" / xác nhận đã thu tiền COD
-CREATE PROCEDURE sp_confirm_payment(IN p_payment_id INT, IN p_reference VARCHAR(60), IN p_admin_id INT)
-BEGIN
-    DECLARE v_order_id INT;
-    SELECT order_id INTO v_order_id FROM payments WHERE id = p_payment_id;
-    UPDATE payments
-       SET status = 'Thành công', reference_code = COALESCE(p_reference, reference_code),
-           confirmed_at = NOW(), confirmed_by = p_admin_id
-     WHERE id = p_payment_id;
-    UPDATE orders SET payment_status = 'Đã thanh toán' WHERE id = v_order_id;
-    INSERT INTO admin_logs (user_id, action, target)
-    SELECT p_admin_id, 'Xác nhận thanh toán', payment_code FROM payments WHERE id = p_payment_id;
-END$$
-
--- Popup "Yêu cầu hoàn tiền" (số tiền + lý do)
-CREATE PROCEDURE sp_refund_payment(IN p_payment_id INT, IN p_amount DECIMAL(12,0), IN p_reason VARCHAR(255), IN p_admin_id INT)
-BEGIN
-    DECLARE v_order_id INT;
-    SELECT order_id INTO v_order_id FROM payments WHERE id = p_payment_id;
-    INSERT INTO refunds (payment_id, refund_amount, reason, requested_by)
-    VALUES (p_payment_id, p_amount, p_reason, p_admin_id);
-    UPDATE payments SET status = 'Đã hoàn tiền' WHERE id = p_payment_id;
-    UPDATE orders   SET payment_status = 'Đã hoàn tiền' WHERE id = v_order_id;
-    INSERT INTO admin_logs (user_id, action, target)
-    SELECT p_admin_id, 'Hoàn tiền', payment_code FROM payments WHERE id = p_payment_id;
-END$$
-
--- =====================================================
--- PHẦN 5: TRIGGER (tạo SAU khi nhập dữ liệu mẫu để không làm lệch tồn kho mẫu)
--- =====================================================
-
--- Đặt hàng -> tự trừ tồn kho
-CREATE TRIGGER trg_order_items_after_insert
-AFTER INSERT ON order_items
-FOR EACH ROW
-BEGIN
-    UPDATE products SET stock = GREATEST(stock - NEW.quantity, 0) WHERE id = NEW.product_id;
-END$$
-
--- Đổi trạng thái đơn -> ghi lịch sử; hủy đơn -> hoàn lại tồn kho
-CREATE TRIGGER trg_orders_after_update
-AFTER UPDATE ON orders
-FOR EACH ROW
-BEGIN
-    IF OLD.order_status <> NEW.order_status THEN
-        INSERT INTO order_status_history (order_id, old_status, new_status)
-        VALUES (NEW.id, OLD.order_status, NEW.order_status);
-        IF NEW.order_status = 'Đã hủy' THEN
-            UPDATE products p
-            JOIN order_items oi ON oi.product_id = p.id
-            SET p.stock = p.stock + oi.quantity
-            WHERE oi.order_id = NEW.id;
-        END IF;
-    END IF;
-END$$
-
-DELIMITER ;
-
--- =====================================================
 -- PHẦN 6: TRUY VẤN MẪU CHO TỪNG TRANG
 -- =====================================================
 -- WEBSITE
--- SELECT * FROM v_products WHERE status=1 AND is_featured=1;                       -- Sản phẩm nổi bật
--- SELECT * FROM v_products WHERE status=1 AND is_bestseller=1;                     -- Sản phẩm bán chạy
--- SELECT * FROM v_products WHERE group_slug='dien-thoai' AND status=1;             -- Lọc theo nhóm menu
--- SELECT * FROM v_products WHERE final_price BETWEEN 10000000 AND 30000000 ORDER BY final_price;
 -- SELECT * FROM articles WHERE status='Xuất bản' AND is_visible=1 ORDER BY published_at DESC LIMIT 4;
 --
 -- ADMIN
--- SELECT * FROM v_dashboard_stats;                                                 -- 4 thẻ thống kê
--- SELECT * FROM v_monthly_revenue ORDER BY month;                                  -- Biểu đồ doanh thu
--- SELECT * FROM v_users_admin WHERE role='customer' AND status='active';           -- Lọc người dùng
--- SELECT * FROM v_orders_admin WHERE order_status='Đang giao hàng';                -- Lọc đơn hàng
--- SELECT * FROM v_payment_stats;                                                   -- 4 thẻ trang thanh toán
--- CALL sp_confirm_payment(3, 'VCB-123456', 1);                                     -- Duyệt chuyển khoản PAY-9824
--- CALL sp_refund_payment(2, 1500000, 'Khách trả hàng', 1);                         -- Hoàn tiền
 -- UPDATE users SET status='locked' WHERE user_code='TK-04';                        -- Khóa tài khoản
 -- UPDATE orders SET order_status='Đã hủy' WHERE order_code='DH-9014';              -- Hủy đơn (tự hoàn kho)

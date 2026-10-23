@@ -12,10 +12,10 @@ class csdltmdt
             return $value === false || $value === '' ? $default : $value;
         };
 
-        $host = $env('DB_HOST', 'localhost');
-        $username = $env('DB_USERNAME', 'root');
-        $password = $env('DB_PASSWORD', '');
-        $database = $env('DB_DATABASE', 'it_mobile');
+        $host = $env('DB_HOST', 'sql104.infinityfree.com');
+        $username = $env('DB_USERNAME', 'if0_43252657');
+        $password = $env('DB_PASSWORD', 'Camduochoi2000');
+        $database = $env('DB_DATABASE', 'if0_43252657_it_mobile');
         $port = (int)$env('DB_PORT', '3306');
 
         $con = new mysqli($host, $username, $password, $database, $port);
