@@ -118,7 +118,7 @@ include("includes/navbar.php");
                 <h1>Tạo mới người dùng</h1>
             </div>
             <div class="product-breadcrumb">
-                <a href="<?php echo BASE_URL; ?>/qlnguoidung.php">Danh Sách Người Dùng</a> / <span>Thêm Người Dùng</span>
+                <a href="<?php echo BASE_URL; ?>/admin/qlnguoidung.php">Danh Sách Người Dùng</a> / <span>Thêm Người Dùng</span>
             </div>
         </div>
 
@@ -182,9 +182,9 @@ include("includes/navbar.php");
 
             <div class="product-form-actions" style="margin-top: 20px;">
                 <button type="submit" class="btn-submit-save">Lưu lại</button>
-                <a href="<?php echo BASE_URL; ?>/qlnguoidung.php" class="btn-submit-cancel nutHuy"
+                <a href="<?php echo BASE_URL; ?>/admin/qlnguoidung.php" class="btn-submit-cancel nutHuy"
                     data-type="tài khoản"
-                    data-redirect="<?php echo BASE_URL; ?>/qlnguoidung.php">
+                    data-redirect="<?php echo BASE_URL; ?>/admin/qlnguoidung.php">
                     Hủy bỏ
                 </a>
             </div>

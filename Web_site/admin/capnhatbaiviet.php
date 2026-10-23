@@ -151,7 +151,7 @@ include("includes/navbar.php");
                 <h1>Cập nhật bài viết: <?php echo htmlspecialchars($article_code); ?></h1>
             </div>
             <div class="product-breadcrumb">
-                <a href="<?php echo BASE_URL; ?>/qlbaiviet.php">Quản Lý Bài Viết</a> / <span>Cập Nhật Bài Viết</span>
+                <a href="<?php echo BASE_URL; ?>/admin/baiviet.php">Quản Lý Bài Viết</a> / <span>Cập Nhật Bài Viết</span>
             </div>
         </div>
 
@@ -196,9 +196,9 @@ include("includes/navbar.php");
                 <div class="product-field-group">
                     <label>Trạng thái</label>
                     <select name="status" class="product-input" required>
-                        <option value="Xuất bản" <?php echo ($status === 'Xuất bản') ? 'selected' : ''; ?>>Xuất bản</option>
-                        <option value="Bản nháp" <?php echo ($status === 'Bản nháp') ? 'selected' : ''; ?>>Bản nháp</option>
-                        <option value="Chờ duyệt" <?php echo ($status === 'Chờ duyệt') ? 'selected' : ''; ?>>Chờ duyệt</option>
+                        <option value="Xuất bản" <?php echo ($status === 'Xuat ban') ? 'selected' : ''; ?>>Xuất bản</option>
+                        <option value="Bản nháp" <?php echo ($status === 'Ban nhap') ? 'selected' : ''; ?>>Bản nháp</option>
+                        <option value="Chờ duyệt" <?php echo ($status === 'Cho duyet') ? 'selected' : ''; ?>>Chờ duyệt</option>
                     </select>
                 </div>
 
@@ -253,9 +253,9 @@ include("includes/navbar.php");
                     Lưu lại
                 </button>
 
-                <a href="<?php echo BASE_URL; ?>/qlbaiviet.php" class="btn-submit-cancel nutHuy"
+                <a href="<?php echo BASE_URL; ?>/admin/baiviet.php" class="btn-submit-cancel nutHuy"
                     data-type="bài viết"
-                    data-redirect="<?php echo BASE_URL; ?>/qlbaiviet.php">
+                    data-redirect="<?php echo BASE_URL; ?>/admin/baiviet.php">
                     Hủy bỏ
                 </a>
             </div>

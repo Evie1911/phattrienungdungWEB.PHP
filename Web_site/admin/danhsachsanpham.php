@@ -54,7 +54,7 @@ include("includes/navbar.php");
                 <h1>Quản Lý Sản Phẩm</h1>
                 <p>Thêm mới, cập nhật và quản lý danh mục điện thoại, phụ kiện</p>
             </div>
-            <a href="<?php echo BASE_URL; ?>/themsanpham.php" class="btn-primary" title="Thêm sản phẩm mới">
+            <a href="<?php echo BASE_URL; ?>/admin/themsanpham.php" class="btn-primary" title="Thêm sản phẩm mới">
                 <i class="fa-solid fa-plus"></i> <span>Thêm sản phẩm mới</span>
             </a>
         </div>
@@ -132,7 +132,7 @@ include("includes/navbar.php");
                                 <td><span class="badge-category">' . $categoryName . '</span></td>
                                 <td>
                                     <div class="action-buttons">
-                                        <a href="' . BASE_URL . '/capnhatsp.php?id=' . $sanpham[$i]['id'] . '" class="btn-action btn-edit" title="Chỉnh sửa">
+                                        <a href="' . BASE_URL . '/admin/capnhatsp.php?id=' . $sanpham[$i]['id'] . '" class="btn-action btn-edit" title="Chỉnh sửa">
                                             <i class="fa-regular fa-pen-to-square"></i>
                                         </a>
                                         <button type="button" class="btn-action btn-delete nutxoa" title="Xóa" data-id="' . $sanpham[$i]['id'] . '" data-name="' . htmlspecialchars($sanpham[$i]['name']) . '">

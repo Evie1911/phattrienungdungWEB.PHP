@@ -103,7 +103,7 @@ include 'includes/navbar.php';
                 <h1>Tạo Mới Bài Viết</h1>
             </div>
             <div class="product-breadcrumb">
-                <a href="<?php echo BASE_URL; ?>/baiviet.php">Quản Lý Bài Viết</a> / <span>Thêm Bài Viết</span>
+                <a href="<?php echo BASE_URL; ?>/admin/baiviet.php">Quản Lý Bài Viết</a> / <span>Thêm Bài Viết</span>
             </div>
         </div>
 
@@ -187,9 +187,9 @@ include 'includes/navbar.php';
 
             <div class="product-form-actions" style="margin-top: 20px;">
                 <button type="submit" class="btn-submit-save">Lưu lại</button>
-                <a href="<?php echo BASE_URL; ?>/baiviet.php" class="btn-submit-cancel nutHuv"
+                <a href="<?php echo BASE_URL; ?>/admin/baiviet.php" class="btn-submit-cancel nutHuy"
                     data-type="bài viết"
-                    data-redirect="<?php echo BASE_URL; ?>/baiviet.php">
+                    data-redirect="<?php echo BASE_URL; ?>/admin/baiviet.php">
                     Hủy bỏ
                 </a>
             </div>

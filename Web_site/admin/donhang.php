@@ -150,7 +150,7 @@ include("includes/navbar.php");
                                     // Kiểm tra nếu đơn hàng đã kết thúc (Hoàn thành hoặc Đã hủy)
                                     $is_finished = ($current_status === 'Hoàn thành' || $current_status === 'Đã hủy');
                                     ?>
-                                    <select  class="product-input status-select" data-id="<?php echo $ord['id']; ?>" <?php echo $is_finished ? 'disabled style="background-color: #f1f5f9; cursor: not-allowed;"' : ''; ?>>
+                                    <select class="product-input status-select" data-id="<?php echo $ord['id']; ?>" <?php echo $is_finished ? 'disabled style="background-color: #f1f5f9; cursor: not-allowed;"' : ''; ?>>
                                         <?php
                                         $statuses = [
                                             'Chờ xác nhận' => 1,
