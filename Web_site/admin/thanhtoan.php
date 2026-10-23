@@ -569,7 +569,6 @@ include("includes/navbar.php");
                     <label style="${label}">Loại hoàn tiền</label>
                     <div style="display:flex; gap:20px; margin-bottom:14px;">
                         <label style="cursor:pointer;"><input type="radio" name="rf-type" value="full" checked> Hoàn toàn bộ</label>
-                        <label style="cursor:pointer;"><input type="radio" name="rf-type" value="partial"> Hoàn một phần</label>
                     </div>
                     <label style="${label}">Số tiền hoàn (đ)</label>
                     <input type="number" id="rf-amount" min="1" max="${remain}" step="1000" value="${remain}" disabled style="${field}background:#f1f5f9;">

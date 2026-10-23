@@ -73,8 +73,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_order_detail') {
     $order_id = intval($_GET['id']);
 
     // Lấy thông tin đơn hàng gộp với bảng thanh toán (đổi tên cột status thành payment_status)
-    $order_info = $p->xuatdulieu("SELECT o.*, p.method, p.status AS payment_status, p.reference_code, p.amount AS payment_amount FROM orders o LEFT JOIN payments p ON o.id = p.order_id WHERE o.id = '$order_id' LIMIT 1");
-    // Lấy danh sách sản phẩm thuộc đơn hàng đó
+    $order_info = $p->xuatdulieu("SELECT o.*, p.status as payment_status_text, p.method as payment_method_text, p.note as payment_note 
+                                 FROM orders o 
+                                 LEFT JOIN payments p ON o.id = p.order_id 
+                                 WHERE o.id = '$order_id' LIMIT 1");    // Lấy danh sách sản phẩm thuộc đơn hàng đó
     $order_items = $p->xuatdulieu("SELECT * FROM order_items WHERE order_id = '$order_id'");
 
     if (!empty($order_info)) {
@@ -286,58 +288,67 @@ include("includes/navbar.php");
                             items.forEach(item => {
                                 let subtotal = item.unit_price * item.quantity;
                                 itemsHtml += `
-                                <tr>
-                                    <td style="padding: 6px;">${item.product_name} ${item.color ? '('+item.color+')' : ''}</td>
-                                    <td style="padding: 6px; text-align: center;">${item.quantity}</td>
-                                    <td style="padding: 6px; text-align: right;">${Number(subtotal).toLocaleString('vi-VN')} đ</td>
-                                </tr>
-                            `;
+                        <tr>
+                            <td style="padding: 6px;">${item.product_name} ${item.color ? '('+item.color+')' : ''}</td>
+                            <td style="padding: 6px; text-align: center;">${item.quantity}</td>
+                            <td style="padding: 6px; text-align: right;">${Number(subtotal).toLocaleString('vi-VN')} đ</td>
+                        </tr>
+                        `;
                             });
+
+                            // Xử lý hiển thị ghi chú thanh toán nếu có (như lý do hủy thanh toán từ bảng payments)
+                            let paymentNoteHtml = '';
+                            if (ord.payment_note) {
+                                paymentNoteHtml = `<br><span style="color: #e11d48; font-style: italic; font-size: 13px;">- Ghi chú thanh toán: ${ord.payment_note}</span>`;
+                            }
 
                             Swal.fire({
                                 title: `<strong>Chi Tiết Đơn Hàng: ${ord.order_code}</strong>`,
                                 html: `
-                                <div style="text-align: left; font-size: 14px; line-height: 1.6;">
-                                    <p><strong>Trạng thái đơn hàng:</strong> <span style="color: #e67e22; font-weight: 500;">${ord.order_status}</span></p>
-                                    <p><strong>Thanh toán:</strong> ${ord.payment_method} - <span style="color: #27ae60; font-weight: 500;">${ord.payment_status}</span></p>
-                                    ${ord.reference_code ? `<p><strong>Mã giao dịch (TXN):</strong> <span style="font-family: monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">${ord.reference_code}</span></p>` : ''}
-                                    
-                                    <p style="margin-bottom: 5px; margin-top: 10px;"><strong>Khách hàng:</strong></p>
-                                    <div style="padding-left: 10px; background: #f8fafc; padding: 8px; border-radius: 6px;">
-                                        - ${ord.receiver_name}<br>
-                                        - SĐT: ${ord.phone}<br>
-                                        - Email: ${ord.email}<br>
-                                        - Địa chỉ: ${ord.address}
-                                        ${ord.note ? '<br>- Ghi chú: ' + ord.note : ''}
-                                    </div>
-                                    
-                                    <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
-                                    
-                                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                                        <thead>
-                                            <tr style="border-bottom: 1px solid #ddd;">
-                                                <th style="padding: 6px;">Sản phẩm</th>
-                                                <th style="padding: 6px; text-align: center;">SL</th>
-                                                <th style="padding: 6px; text-align: right;">Thành tiền</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${itemsHtml}
-                                        </tbody>
-                                    </table>
-                                    
-                                    <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
-                                    
-                                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 15px;">
-                                        <span>Phí vận chuyển:</span>
-                                        <span>${Number(ord.shipping_fee).toLocaleString('vi-VN')} đ</span>
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 16px; margin-top: 5px;">
-                                        <span>Tổng thanh toán:</span>
-                                        <span style="color: #e74c3c;">${Number(ord.total_amount).toLocaleString('vi-VN')} đ</span>
-                                    </div>
-                                </div>
-                            `,
+                        <div style="text-align: left; font-size: 14px; line-height: 1.6;">
+                            <p><strong>Trạng thái đơn hàng:</strong> <span style="color: #e67e22; font-weight: 500;">${ord.order_status}</span></p>
+                            <p>
+                                <strong>Thanh toán:</strong> ${ord.payment_method} - <span style="color: #27ae60; font-weight: 500;">${ord.payment_status}</span>
+                                ${paymentNoteHtml}
+                            </p>
+                            ${ord.reference_code ? `<p><strong>Mã giao dịch (TXN):</strong> <span style="font-family: monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">${ord.reference_code}</span></p>` : ''}
+                            
+                            <p style="margin-bottom: 5px; margin-top: 10px;"><strong>Khách hàng:</strong></p>
+                            <div style="padding-left: 10px; background: #f8fafc; padding: 8px; border-radius: 6px;">
+                                - ${ord.receiver_name}<br>
+                                - SĐT: ${ord.phone}<br>
+                                - Email: ${ord.email}<br>
+                                - Địa chỉ: ${ord.address}
+                                ${ord.note ? '<br>- Ghi chú đơn hàng: ' + ord.note : ''}
+                            </div>
+                            
+                            <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
+                            
+                            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid #ddd;">
+                                        <th style="padding: 6px;">Sản phẩm</th>
+                                        <th style="padding: 6px; text-align: center;">SL</th>
+                                        <th style="padding: 6px; text-align: right;">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${itemsHtml}
+                                </tbody>
+                            </table>
+                            
+                            <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
+                            
+                            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 15px;">
+                                <span>Phí vận chuyển:</span>
+                                <span>${Number(ord.shipping_fee).toLocaleString('vi-VN')} đ</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 16px; margin-top: 5px;">
+                                <span>Tổng thanh toán:</span>
+                                <span style="color: #e74c3c;">${Number(ord.total_amount).toLocaleString('vi-VN')} đ</span>
+                            </div>
+                        </div>
+                        `,
                                 confirmButtonText: "Đóng",
                                 confirmButtonColor: "#3085d6",
                                 width: "580px",
@@ -348,6 +359,7 @@ include("includes/navbar.php");
                     });
             });
         });
+      
     });
 </script>
 
