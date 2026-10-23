@@ -4,10 +4,19 @@ include("xyly/xuly.php");
 
 $p = new xuly();
 
-// Xử lý cập nhật trạng thái đơn hàng
+// === TỰ ĐỘNG ĐỒNG BỘ TRẠNG THÁI ===
+// Nếu thanh toán đã hủy hoặc thất bại nhưng đơn hàng chưa hủy/hoàn thành -> Tự động cập nhật đơn hàng thành Đã hủy
+$p->themxoasua("UPDATE orders o JOIN payments p ON o.id = p.order_id 
+                SET o.order_status = 'Đã hủy' 
+                WHERE (p.status = 'Đã hủy' OR p.status = 'Thất bại') 
+                AND o.order_status NOT IN ('Đã hủy', 'Hoàn thành')");
+
+// === XỬ LÝ KHI ADMIN CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG THỦ CÔNG QUA AJAX ===
 if (isset($_POST['action']) && $_POST['action'] === 'update_status') {
     $order_id = intval($_POST['order_id']);
-    $new_status = $_POST['status'];
+    $new_status = trim($_POST['status']);
+
+    // Định nghĩa thứ tự cấp bậc các trạng thái đơn hàng để kiểm tra logic tiến/lùi
     $status_order = [
         'Chờ xác nhận' => 1,
         'Đã xác nhận' => 2,
@@ -16,25 +25,41 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_status') {
         'Hoàn thành' => 5,
         'Đã hủy' => 6,
     ];
-    // Lấy trạng thái hiện tại trong database
-    $current_order = $p->xuatdulieu("SELECT order_status FROM orders WHERE id = '$order_id' LIMIT 1");
+
+    // Lấy trạng thái hiện tại của đơn hàng và trạng thái thanh toán tương ứng trong database
+    $current_order = $p->xuatdulieu("SELECT o.order_status, p.status AS payment_status FROM orders o LEFT JOIN payments p ON o.id = p.order_id WHERE o.id = '$order_id' LIMIT 1");
+
     if (!empty($current_order)) {
         $old_status = $current_order[0]['order_status'];
-        // Nếu trạng thái là 'Đã hủy' thì không cho sửa nữa
+        $payment_status = $current_order[0]['payment_status'];
+
+        // Kiểm tra 1: Nếu đơn hàng đã kết thúc (Đã hủy hoặc Hoàn thành) thì chặn không cho sửa
         if ($old_status === 'Đã hủy' || $old_status === 'Hoàn thành') {
             echo json_encode(['status' => 'error', 'message' => 'Đơn hàng đã kết thúc, không thể thay đổi trạng thái!']);
             exit();
         }
-        // Kiểm tra nếu không phải chuyển sang 'Đã hủy' và cấp độ mới nhỏ hơn cấp độ cũ (quay đầu)
+
+        // Kiểm tra 2: Nếu thanh toán đã thất bại/hủy mà Admin cố đổi đơn sang trạng thái khác 'Đã hủy' -> Chặn lại
+        if (($payment_status === 'Thất bại' || $payment_status === 'Đã hủy') && $new_status !== 'Đã hủy') {
+            echo json_encode(['status' => 'error', 'message' => 'Thanh toán đã thất bại/hủy, đơn hàng bắt buộc phải chuyển sang trạng thái Đã hủy!']);
+            exit();
+        }
+
+        // Kiểm tra 3: Chặn hành động "quay đầu" trạng thái (chuyển từ bước sau về bước trước) trừ khi hủy đơn
         if ($new_status !== 'Đã hủy' && isset($status_order[$old_status]) && isset($status_order[$new_status])) {
             if ($status_order[$new_status] < $status_order[$old_status]) {
                 echo json_encode(['status' => 'error', 'message' => 'Không thể quay lại trạng thái cũ!']);
                 exit();
             }
         }
-        // Tiến hành cập nhật nếu hợp lệ
+
+        // Thực hiện câu lệnh cập nhật trạng thái mới cho đơn hàng
         $update_sql = "UPDATE orders SET order_status = '$new_status' WHERE id = '$order_id' LIMIT 1";
         if ($p->themxoasua($update_sql)) {
+            // Nếu Admin chọn hủy đơn, tự động đồng bộ cập nhật luôn trạng thái bảng payments thành 'Đã hủy'
+            if ($new_status === 'Đã hủy') {
+                $p->themxoasua("UPDATE payments SET status = 'Đã hủy' WHERE order_id = '$order_id'");
+            }
             echo json_encode(['status' => 'success', 'message' => 'Cập nhật trạng thái thành công!']);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Không thể cập nhật trạng thái!']);
@@ -43,14 +68,15 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_status') {
     exit();
 }
 
-// Xử lý lấy chi tiết đơn hàng
+// === XỬ LÝ LẤY CHI TIẾT ĐƠN HÀNG (Dùng cho Popup xem chi tiết) ===
 if (isset($_GET['action']) && $_GET['action'] === 'get_order_detail') {
     $order_id = intval($_GET['id']);
-    // Lấy thông tin đơn hàng và thanh toán
-    $order_info = $p->xuatdulieu("SELECT * FROM orders o LEFT JOIN payments p ON o.id = p.order_id WHERE o.id = '$order_id' LIMIT 1");
-    // Lấy danh sách sản phẩm trong đơn hàng
+
+    // Lấy thông tin đơn hàng gộp với bảng thanh toán (đổi tên cột status thành payment_status)
+    $order_info = $p->xuatdulieu("SELECT o.*, p.method, p.status AS payment_status, p.reference_code, p.amount AS payment_amount FROM orders o LEFT JOIN payments p ON o.id = p.order_id WHERE o.id = '$order_id' LIMIT 1");
+    // Lấy danh sách sản phẩm thuộc đơn hàng đó
     $order_items = $p->xuatdulieu("SELECT * FROM order_items WHERE order_id = '$order_id'");
-    //nếu có chuyển mảng thành chuỗi dinh dang json 
+
     if (!empty($order_info)) {
         echo json_encode([
             'status' => 'success',
@@ -62,19 +88,26 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_order_detail') {
     }
     exit();
 }
-//Bộ lọc don hang
+
+// === BỘ LỌC VÀ TRUY VẤN DANH SÁCH ĐƠN HÀNG ===
 $search_keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
 $status_filter  = isset($_GET['status']) ? trim($_GET['status']) : '';
-// Truy vấn danh sách đơn hàng từ Tổng số lượng sản phẩm trong đơn hàng Tên sản phẩm đầu tiên đơn hàng
-$sql_orders = "SELECT o.*,
+
+// Câu lệnh SQL lấy danh sách đơn hàng kết hợp trạng thái thanh toán và thông tin sản phẩm đại diện
+$sql_orders = "SELECT o.*, 
+               p.status AS payment_status,
                (SELECT SUM(quantity) FROM order_items WHERE order_id = o.id) as total_qty,
                (SELECT product_name FROM order_items WHERE order_id = o.id LIMIT 1) as first_product_name
-               FROM orders o WHERE 1=1";
+               FROM orders o 
+               LEFT JOIN payments p ON o.id = p.order_id
+               WHERE 1=1";
 
+//  (Mã đơn hàng, tên khách hàng, số điện thoại)
 if ($search_keyword !== '') {
     $keyword_esc = addslashes($search_keyword);
     $sql_orders .= " AND (o.order_code LIKE '%$keyword_esc%' OR o.receiver_name LIKE '%$keyword_esc%' OR o.phone LIKE '%$keyword_esc%')";
 }
+// Thêm điều kiện lọc theo trạng thái đơn hàng
 if ($status_filter !== '') {
     $status_esc = addslashes($status_filter);
     $sql_orders .= " AND o.order_status = '$status_esc'";
