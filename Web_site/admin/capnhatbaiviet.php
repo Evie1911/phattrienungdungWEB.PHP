@@ -195,7 +195,12 @@ include("includes/navbar.php");
 
                 <div class="product-field-group">
                     <label>Trạng thái</label>
-                    <select name="status" class="form-control">
+                    <!-- <select name="status" class="product-input" required>
+                        <option value="Xuất bản" <?php echo ($status === 'Xuat ban') ? 'selected' : ''; ?>>Xuất bản</option>
+                        <option value="Bản nháp" <?php echo ($status === 'Ban nhap') ? 'selected' : ''; ?>>Bản nháp</option>
+                        <option value="Chờ duyệt" <?php echo ($status === 'Cho duyet') ? 'selected' : ''; ?>>Chờ duyệt</option>
+                    </select> -->
+                    <select name="status" class="product-input">
                         <?php $current_status = isset($row['status']) ? $row['status'] : ''; ?>
                         <option value="Xuất bản" <?php echo ($current_status === 'Xuất bản') ? 'selected' : ''; ?>>Xuất bản</option>
                         <option value="Bản nháp" <?php echo ($current_status === 'Bản nháp') ? 'selected' : ''; ?>>Bản nháp</option>
