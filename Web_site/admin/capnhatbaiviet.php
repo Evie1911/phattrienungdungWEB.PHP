@@ -117,7 +117,7 @@ if (!empty($article_info)) {
     $content      = $row['content'];
     $thumbnail    = $row['thumbnail'];
     $author       = $row['author'];
-    $status = isset($row['status']) ? trim($row['status']) : '';
+    $status       = $row['status'];
     $is_visible   = $row['is_visible'];
     $published_at = !empty($row['published_at']) ? date('Y-m-d\TH:i', strtotime($row['published_at'])) : date('Y-m-d\TH:i');
 } else {
@@ -196,9 +196,9 @@ include("includes/navbar.php");
                 <div class="product-field-group">
                     <label>Trạng thái</label>
                     <select name="status" class="product-input" required>
-                        <option value="Xuat ban" <?php echo ($status === 'Xuat ban') ? 'selected' : ''; ?>>Xuất bản</option>
-                        <option value="Ban nhap" <?php echo ($status === 'Ban nhap') ? 'selected' : ''; ?>>Bản nháp</option>
-                        <option value="Cho duyet" <?php echo ($status === 'Cho duyet') ? 'selected' : ''; ?>>Chờ duyệt</option>
+                        <option value="Xuất bản" <?php echo ($status === 'Xuat ban') ? 'selected' : ''; ?>>Xuất bản</option>
+                        <option value="Bản nháp" <?php echo ($status === 'Ban nhap') ? 'selected' : ''; ?>>Bản nháp</option>
+                        <option value="Chờ duyệt" <?php echo ($status === 'Cho duyet') ? 'selected' : ''; ?>>Chờ duyệt</option>
                     </select>
                 </div>
 
