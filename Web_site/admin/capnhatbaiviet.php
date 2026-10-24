@@ -117,7 +117,7 @@ if (!empty($article_info)) {
     $content      = $row['content'];
     $thumbnail    = $row['thumbnail'];
     $author       = $row['author'];
-    $status       = $row['status'];
+    $status = isset($row['status']) ? trim($row['status']) : '';
     $is_visible   = $row['is_visible'];
     $published_at = !empty($row['published_at']) ? date('Y-m-d\TH:i', strtotime($row['published_at'])) : date('Y-m-d\TH:i');
 } else {
