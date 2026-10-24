@@ -54,6 +54,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
                 if ($order_id > 0) {
                     $sql_update_order = "UPDATE orders SET payment_status = 'Đã hủy' WHERE id = $order_id";
                     $p->themxoasua($sql_update_order);
+
+                    // --- HOÀN LẠI SỐ LƯỢNG SẢN PHẨM VÀO KHO (STOCK) ---
+                    // 1. Lấy tất cả sản phẩm và số lượng đã mua trong đơn hàng này từ bảng order_items
+                    $items_result = $p->xuatdulieu("SELECT product_id, quantity FROM order_items WHERE order_id = $order_id");
+
+                    if (!empty($items_result)) {
+                        foreach ($items_result as $item) {
+                            $prod_id = intval($item['product_id']);
+                            $qty_bought = intval($item['quantity']);
+
+                            // 2. Cộng ngược lại số lượng vào cột stock của bảng products
+                            if ($prod_id > 0 && $qty_bought > 0) {
+                                $sql_restore_stock = "UPDATE products SET stock = stock + $qty_bought WHERE id = $prod_id";
+                                $p->themxoasua($sql_restore_stock);
+                            }
+                        }
+                    }
                 }
 
                 header("Location: thanhtoan.php?msg=success_cancel");

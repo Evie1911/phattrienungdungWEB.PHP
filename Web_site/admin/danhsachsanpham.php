@@ -6,12 +6,57 @@ $pageTitle = "Quản lý sản phẩm";
 $p = new xuly();
 
 // Xử lý xóa sản phẩm
+// Xử lý xóa sản phẩm
+// Xử lý xóa sản phẩm
 if (isset($_REQUEST['nut']) && $_REQUEST['nut'] === 'Xóa sản phẩm') {
     $myid = isset($_REQUEST['txtid']) ? intval($_REQUEST['txtid']) : 0;
     if ($myid > 0) {
-        if ($p->themxoasua("DELETE FROM products WHERE id='$myid' LIMIT 1")) {
-            header("Location: danhsachsanpham.php?msg=deleted");
-            exit();
+        // 1. Kiểm tra xem sản phẩm có nằm trong đơn hàng
+        $check_order = $p->xuatdulieu("SELECT COUNT(*) AS total FROM order_items WHERE product_id = '$myid'");
+        $order_total = !empty($check_order) ? intval($check_order[0]['total']) : 0;
+
+        // 2. Kiểm tra số lượng tồn kho
+        $check_stock = $p->xuatdulieu("SELECT stock FROM products WHERE id = '$myid' LIMIT 1");
+        $stock_val = !empty($check_stock) ? intval($check_stock[0]['stock']) : 0;
+
+        // Nếu sản phẩm đã có trong đơn hàng
+        if ($order_total > 0) {
+            echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
+            echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Không thể xóa!",
+                        text: "Sản phẩm này đã phát sinh đơn hàng trong hệ thống.",
+                        confirmButtonText: "Đã hiểu"
+                    }).then(() => {
+                        window.location.href = "danhsachsanpham.php";
+                    });
+                });
+            </script>';
+        }
+        //  Nếu còn hàng trong kho
+        elseif ($stock_val > 0) {
+            echo '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>';
+            echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Không thể xóa!",
+                        text: "Sản phẩm này vẫn còn hàng trong kho (stock > 0). Không thể xóa khi còn hàng.",
+                        confirmButtonText: "Đã hiểu"
+                    }).then(() => {
+                        window.location.href = "danhsachsanpham.php";
+                    });
+                });
+            </script>';
+        }
+        // Thỏa mãn tất cả điều kiện (không có đơn hàng và đã hết hàng) -> Tiến hành xóa
+        else {
+            if ($p->themxoasua("DELETE FROM products WHERE id='$myid' LIMIT 1")) {
+                header("Location: danhsachsanpham.php?msg=deleted");
+                exit();
+            }
         }
     }
 }
