@@ -40,7 +40,7 @@ require_once __DIR__ . '/includes/header.php';
                     <strong>Phương thức:</strong> <?php echo $order['payment_method'] === 'online' ? 'Thanh toán Trực tuyến' : 'Thanh toán khi nhận hàng (COD)'; ?><br>
                     <strong>Trạng thái thanh toán:</strong> 
                     <span class="badge badge-<?php echo $order['payment_status'] === 'paid' ? 'completed' : (in_array($order['payment_status'], ['failed', 'cancelled'], true) ? 'failed' : 'pending'); ?>">
-                        <?php echo $order['payment_status'] === 'paid' ? "\u{0110}\u{00E3} thanh to\u{00E1}n" : ($order['payment_status'] === 'cancelled' ? "\u{0110}\u{00E3} h\u{1EE7}y" : ($order['payment_status'] === 'failed' ? "Thanh to\u{00E1}n th\u{1EA5}t b\u{1EA1}i" : "Ch\u{01B0}a thanh to\u{00E1}n")); ?>
+                        <?php echo $order['payment_status'] === 'paid' ? 'Đã thanh toán' : ($order['payment_status'] === 'cancelled' ? 'Đã hủy' : ($order['payment_status'] === 'failed' ? 'Thanh toán thất bại' : 'Chưa thanh toán')); ?>
                     </span><br>
                     <?php if ($order['payment_method'] === 'online' && $order['payment_status'] === 'unpaid'): ?>
                         <span style="color:var(--text-secondary);">Đang chờ VNPay xác nhận giao dịch.</span><br>
@@ -51,7 +51,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <div style="text-align: center;">
-            <?php if ($order['payment_method'] === 'online' && $order['payment_status'] === 'failed' && $order['order_status'] !== "\u{0110}\u{00E3} h\u{1EE7}y"): ?>
+            <?php if ($order['payment_method'] === 'online' && $order['payment_status'] === 'failed' && $order['order_status'] !== 'Đã hủy'): ?>
                 <a href="<?php echo BASE_URL; ?>/payment-process.php?order_id=<?php echo urlencode($order['id']); ?>" class="btn btn-primary btn-lg" style="margin-right: 8px;">
                     <i class="fas fa-credit-card"></i> Thử thanh toán VNPay lại
                 </a>

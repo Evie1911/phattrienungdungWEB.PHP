@@ -346,8 +346,8 @@ class DataHelper extends csdltmdt
                 $paymentStatus = 'Thành công';
             } else {
                 if (!$alreadyPaid) {
-                    $failedStatus = "Th\u{1EA5}t b\u{1EA1}i";
-                    $cancelledStatus = "\u{0110}\u{00E3} h\u{1EE7}y";
+                    $failedStatus = 'Thất bại';
+                    $cancelledStatus = 'Đã hủy';
                     if ($cancelled) {
                         $stmt = $db->prepare('UPDATE orders SET payment_status=?, order_status=? WHERE id=?');
                         $stmt->bind_param('ssi', $cancelledStatus, $cancelledStatus, $dbOrderId);
@@ -359,8 +359,8 @@ class DataHelper extends csdltmdt
                     $stmt->close();
                 }
                 $paymentStatus = $alreadyPaid
-                    ? "Th\u{00E0}nh c\u{00F4}ng"
-                    : ($cancelled ? "\u{0110}\u{00E3} h\u{1EE7}y" : "Th\u{1EA5}t b\u{1EA1}i");
+                    ? 'Thành công'
+                    : ($cancelled ? 'Đã hủy' : 'Thất bại');
             }
 
             $stmt = $db->prepare("UPDATE payments SET status=?, reference_code=COALESCE(NULLIF(?,''),reference_code), confirmed_at=IF(?='Thành công',NOW(),confirmed_at) WHERE id=?");
@@ -394,9 +394,9 @@ class DataHelper extends csdltmdt
     {
         $db=$this->db(); $stmt=$db->prepare('SELECT * FROM orders WHERE order_code=? LIMIT 1'); $stmt->bind_param('s',$id); $stmt->execute(); $r=$stmt->get_result()->fetch_assoc(); $stmt->close();
         if (!$r) return null;
-        $paidStatus = "\u{0110}\u{00E3} thanh to\u{00E1}n";
-        $failedStatus = "Th\u{1EA5}t b\u{1EA1}i";
-        $cancelledStatus = "\u{0110}\u{00E3} h\u{1EE7}y";
+        $paidStatus = 'Đã thanh toán';
+        $failedStatus = 'Thất bại';
+        $cancelledStatus = 'Đã hủy';
         $mappedPaymentStatus = $r['payment_status'] === $paidStatus
             ? 'paid'
             : ($r['payment_status'] === $failedStatus ? 'failed' : ($r['payment_status'] === $cancelledStatus ? 'cancelled' : 'unpaid'));

@@ -23,15 +23,15 @@ if (!$order) {
 $result = record_vnpay_result($_GET);
 if (empty($result['valid'])) {
     error_log('VNPay return could not record transaction result.');
-    set_flash("error", "Kh\u{00F4}ng th\u{1EC3} c\u{1EAD}p nh\u{1EAD}t k\u{1EBF}t qu\u{1EA3} giao d\u{1ECB}ch. Vui l\u{00F2}ng li\u{00EAn h\u{1EC7} c\u{1EED}a h\u{00E0}ng ki\u{1EC3}m tra.");
+    set_flash('error', 'Không thể cập nhật kết quả giao dịch. Vui lòng liên hệ cửa hàng kiểm tra.');
     redirect('order-success.php?order_id=' . urlencode($order['id']));
 }
 
 if (!empty($result['paid'])) {
-    set_flash("success", "Thanh to\u{00E1}n VNPay th\u{00E0}nh c\u{00F4}ng.");
+    set_flash('success', 'Thanh toán VNPay thành công.');
 } elseif (($_GET['vnp_ResponseCode'] ?? '') === '24') {
-    set_flash("error", "B\u{1EA1}n \u{0111}\u{00E3} h\u{1EE7}y giao d\u{1ECB}ch VNPay. \u{0110}\u{01A1}n h\u{00E0}ng \u{0111}\u{00E3} \u{0111}\u{01B0}\u{1EE3}c h\u{1EE7}y.");
+    set_flash('error', 'Bạn đã hủy giao dịch VNPay. Đơn hàng đã được hủy.');
 } else {
-    set_flash("error", "Giao d\u{1ECB}ch VNPay th\u{1EA5}t b\u{1EA1}i. \u{0110}\u{01A1}n h\u{00E0}ng ch\u{01B0}a \u{0111}\u{01B0}\u{1EE3}c thanh to\u{00E1}n.");
+    set_flash('error', 'Giao dịch VNPay thất bại. Đơn hàng chưa được thanh toán.');
 }
 redirect('order-success.php?order_id=' . urlencode($order['id']));

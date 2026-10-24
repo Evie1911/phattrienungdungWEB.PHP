@@ -82,7 +82,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <a href="<?php echo BASE_URL; ?>/news.php"><i class="fas fa-newspaper"></i> Tin tức & Bài viết</a>
                     </li>
                     <li class="nav-item <?php echo $current_page === 'about.php' ? 'active' : ''; ?>">
-                        <a href="<?php echo BASE_URL; ?>/about.php"><i class="fas fa-info-circle"></i> Giới thiệu</a>
+                        <a href="<?php echo BASE_URL; ?>/about.php"><i class="fas fa-info-circle"></i> Giới thiệu </a>
                     </li>
                 </ul>
 
