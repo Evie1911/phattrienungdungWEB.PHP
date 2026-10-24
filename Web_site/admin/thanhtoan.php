@@ -13,13 +13,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
     if ($payment_id > 0) {
         $admin_id = isset($_SESSION['id']) ? intval($_SESSION['id']) : 0;
 
-        //DUYỆT THANH TOÁN 
+        // 1. LẤY order_id TỪ BẢNG payments ĐỂ CẬP NHẬT ĐƠN HÀNG TƯƠNG ỨNG
+        $sql_get_order = "SELECT order_id FROM payments WHERE id = $payment_id LIMIT 1";
+        $res_order = $p->xuatdulieu($sql_get_order);
+        $order_id = (!empty($res_order) && isset($res_order[0]['order_id'])) ? intval($res_order[0]['order_id']) : 0;
+
+        // DUYỆT THANH TOÁN 
         if ($action_type === 'approve_payment') {
             $ref = isset($_POST['reference_code']) ? trim($_POST['reference_code']) : '';
             $note = isset($_POST['note']) ? trim($_POST['note']) : 'Đã xác nhận thanh toán';
             $refEscaped = addslashes($ref);
             $noteEscaped = addslashes($note);
 
+            // Cập nhật bảng payments
             $sql_update = "UPDATE payments SET status = 'Thành công', reference_code = IF('$refEscaped' != '', '$refEscaped', reference_code), note = '$noteEscaped', confirmed_at = NOW()";
             if ($admin_id) {
                 $sql_update .= ", confirmed_by = $admin_id";
@@ -27,6 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
             $sql_update .= " WHERE id = $payment_id";
 
             if ($p->themxoasua($sql_update)) {
+                // ĐỒNG BỘ: Cập nhật payment_status trong bảng orders thành 'Đã thanh toán'
+                if ($order_id > 0) {
+                    $sql_update_order = "UPDATE orders SET payment_status = 'Đã thanh toán' WHERE id = $order_id";
+                    $p->themxoasua($sql_update_order);
+                }
+
                 header("Location: thanhtoan.php?msg=success_approve");
                 exit();
             }
@@ -38,11 +50,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
 
             $sql_update_payment = "UPDATE payments SET status = 'Đã hủy', note = CONCAT(IFNULL(note,''), ' | Hủy thanh toán: ', '$reasonEscaped') WHERE id = $payment_id";
             if ($p->themxoasua($sql_update_payment)) {
+                // ĐỒNG BỘ: Cập nhật payment_status trong bảng orders thành 'Đã hủy'
+                if ($order_id > 0) {
+                    $sql_update_order = "UPDATE orders SET payment_status = 'Đã hủy' WHERE id = $order_id";
+                    $p->themxoasua($sql_update_order);
+                }
+
                 header("Location: thanhtoan.php?msg=success_cancel");
                 exit();
             }
         }
-        //Yêu cầu hoàn tiền (Hoàn toàn bộ / một phần)
+        // Yêu cầu hoàn tiền (Hoàn toàn bộ / một phần)
         elseif ($action_type === 'refund') {
             $rf_type = isset($_POST['rf_type']) ? trim($_POST['rf_type']) : 'full';
             $rf_amount = isset($_POST['rf_amount']) ? floatval($_POST['rf_amount']) : 0;
@@ -53,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
             if ($rf_amount > 0) {
                 $full_reason = $rf_reason_type;
                 if (!empty($rf_reason_detail)) {
-                    $full_reason .= " - " . $rf_reason_detail;
+                    $full_reason .= "\n" . $rf_reason_detail;
                 }
                 $reasonEscaped = addslashes($full_reason);
                 $refEscaped = addslashes($rf_ref);
@@ -61,8 +79,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
                 $sql_insert_refund = "INSERT INTO refunds (payment_id, refund_amount, reason, created_at) VALUES ($payment_id, $rf_amount, '$reasonEscaped', NOW())";
                 @$p->themxoasua($sql_insert_refund);
 
-                $sql_update_payment = "UPDATE payments SET status = 'Đã hoàn tiền', reference_code = IF('$refEscaped' != '', '$refEscaped', reference_code), note = CONCAT(IFNULL(note,''), ' | Hoàn tiền (', '$rf_type', '): ', '$reasonEscaped') WHERE id =$payment_id";
+                $sql_update_payment = "UPDATE payments SET status = 'Đã hoàn tiền', reference_code = IF('$refEscaped' != '', '$refEscaped', reference_code), note = CONCAT(IFNULL(note,''), ' | Hoàn tiền (', '$rf_type', '): ', '$reasonEscaped') WHERE id = $payment_id";
                 if ($p->themxoasua($sql_update_payment)) {
+                    // ĐỒNG BỘ: Cập nhật payment_status trong bảng orders thành 'Đã hoàn tiền'
+                    if ($order_id > 0) {
+                        $sql_update_order = "UPDATE orders SET payment_status = 'Đã hoàn tiền' WHERE id = $order_id";
+                        $p->themxoasua($sql_update_order);
+                    }
+
                     header("Location: thanhtoan.php?msg=success_refund");
                     exit();
                 }
@@ -70,6 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_type'])) {
         }
     }
 }
+
+// Nhận từ khóa tìm kiếm và bộ lọc phần dưới giữ nguyên...
 
 // Nhận từ khóa tìm kiếm và bộ lọc
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
@@ -543,7 +569,6 @@ include("includes/navbar.php");
                     <label style="${label}">Loại hoàn tiền</label>
                     <div style="display:flex; gap:20px; margin-bottom:14px;">
                         <label style="cursor:pointer;"><input type="radio" name="rf-type" value="full" checked> Hoàn toàn bộ</label>
-                        <label style="cursor:pointer;"><input type="radio" name="rf-type" value="partial"> Hoàn một phần</label>
                     </div>
                     <label style="${label}">Số tiền hoàn (đ)</label>
                     <input type="number" id="rf-amount" min="1" max="${remain}" step="1000" value="${remain}" disabled style="${field}background:#f1f5f9;">

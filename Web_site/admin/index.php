@@ -53,9 +53,8 @@ foreach ($import_data_raw as $item) {
 
 
 // DỮ LIỆU DOANH THU (Đơn hoàn thành)
-
 // Theo Tháng
-$sql_month = "SELECT MONTH(created_at) AS m, SUM(total_amount) AS rev FROM orders WHERE YEAR(created_at) = YEAR(CURDATE()) AND order_status = 'Hoàn thành' GROUP BY MONTH(created_at)";
+$sql_month = "SELECT MONTH(created_at) AS m, SUM(total_amount) AS rev FROM orders WHERE YEAR(created_at) = YEAR(CURDATE()) AND order_status = 'Hoàn thành' AND payment_status = 'Đã thanh toán' GROUP BY MONTH(created_at)";
 $data_month = $db->xuatdulieu($sql_month);
 $arr_month_rev = array_fill(0, 12, 0);
 foreach ($data_month as $row) {
@@ -63,7 +62,7 @@ foreach ($data_month as $row) {
 }
 
 // Theo Quý
-$sql_quarter = "SELECT QUARTER(created_at) AS q, SUM(total_amount) AS rev FROM orders WHERE YEAR(created_at) = YEAR(CURDATE()) AND order_status = 'Hoàn thành' GROUP BY QUARTER(created_at)";
+$sql_quarter = "SELECT QUARTER(created_at) AS q, SUM(total_amount) AS rev FROM orders WHERE YEAR(created_at) = YEAR(CURDATE()) AND order_status = 'Hoàn thành' AND payment_status = 'Đã thanh toán' GROUP BY QUARTER(created_at)";
 $data_quarter = $db->xuatdulieu($sql_quarter);
 $arr_quarter_rev = [0, 0, 0, 0];
 foreach ($data_quarter as $row) {
@@ -71,7 +70,7 @@ foreach ($data_quarter as $row) {
 }
 
 // Theo Năm
-$sql_year = "SELECT YEAR(created_at) AS y, SUM(total_amount) AS rev FROM orders WHERE order_status = 'Hoàn thành' GROUP BY YEAR(created_at) ORDER BY y ASC";
+$sql_year = "SELECT YEAR(created_at) AS y, SUM(total_amount) AS rev FROM orders WHERE order_status = 'Hoàn thành' AND payment_status = 'Đã thanh toán' GROUP BY YEAR(created_at) ORDER BY y ASC";
 $data_year = $db->xuatdulieu($sql_year);
 $arr_year_labels = [];
 $arr_year_rev = [];
